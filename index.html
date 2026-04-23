@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Hive — Demo Prototype</title>
+<style>
+  /* =========================================================
+     NUMBER HIVE DEMO — Clickable Prototype V2
+     Now mirrors the real game: 59-product hive, dual pads,
+     change-one-factor mechanic, strategic scenarios.
+     ========================================================= */
+
+  :root {
+    --cream: #FAF6EC;
+    --cream-warm: #F4EDD9;
+    --ink: #1E1A15;
+    --ink-soft: #4A4239;
+    --muted: #8A8076;
+    --honey: #F5B825;
+    --honey-deep: #C78508;
+    --honey-soft: #FFF1D0;
+    --amber: #F39420;
+    --amber-deep: #D17A14;
+    --amber-soft: #FFD797;
+    --red: #E8523D;
+    --red-deep: #BC3A27;
+    --red-soft: #FBC5BB;
+    --border: #E4DCC7;
+    --shadow: 0 20px 60px rgba(30, 26, 21, 0.08);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+  }
+
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Topbar */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(250, 246, 236, 0.92);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .topbar .logo-mark {
+    width: 28px; height: 28px;
+    background: var(--honey);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .topbar .restart {
+    font-size: 13px;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .topbar .restart:hover { color: var(--ink); }
+
+  /* Progress dots */
+  .progress {
+    padding: 20px 24px 0;
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+  }
+  .progress .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #DCD3BE;
+    transition: all 0.3s ease;
+  }
+  .progress .dot.active { background: var(--honey); transform: scale(1.3); }
+  .progress .dot.done { background: var(--ink-soft); }
+
+  /* Stage */
+  .stage {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 30px 24px 80px;
+  }
+  .screen {
+    position: absolute;
+    inset: 30px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  /* Typography */
+  h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; line-height: 1.15; color: var(--ink); }
+  h1 { font-size: clamp(28px, 4vw, 40px); }
+  h2 { font-size: clamp(22px, 3vw, 28px); }
+  h3 { font-size: 18px; font-weight: 600; }
+  p.lead { font-size: 18px; color: var(--ink-soft); }
+  p.meta { font-size: 14px; color: var(--muted); }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--honey-deep);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(30,26,21,0.15); }
+  .btn:active { transform: translateY(0); }
+  .btn.primary { background: var(--honey); color: var(--ink); }
+  .btn.primary:hover { background: var(--honey-deep); color: #fff; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn.ghost:hover { background: var(--cream-warm); }
+  .btn-arrow::after { content: "→"; margin-left: 4px; transition: transform 0.15s ease; }
+  .btn.btn-arrow:hover::after { transform: translateX(3px); }
+
+  /* Hook options */
+  .options { display: grid; gap: 12px; margin-top: 28px; }
+  .option {
+    text-align: left;
+    padding: 18px 22px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font: inherit;
+    color: var(--ink);
+    font-size: 17px;
+    transition: all 0.15s ease;
+  }
+  .option:hover {
+    border-color: var(--honey);
+    background: var(--honey-soft);
+    transform: translateY(-1px);
+  }
+  .option .num {
+    display: inline-block;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--cream-warm);
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 26px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+
+  /* Game frame */
+  .game-frame {
+    position: relative;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 20px 24px;
+    margin-top: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Player bar (top of board) */
+  .player-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .player-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    opacity: 0.5;
+  }
+  .player-chip.active {
+    opacity: 1;
+    border-color: var(--honey);
+    background: var(--amber-soft);
+    color: var(--ink);
+  }
+  .player-chip .bee { font-size: 18px; }
+  .turn-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    flex: 1;
+  }
+
+  /* Board */
+  .board-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px 0 16px;
+  }
+  .board-svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* Hex styles */
+  .hex {
+    transition: fill 0.3s ease, stroke 0.3s ease, transform 0.3s ease;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .hex-text {
+    font-family: inherit;
+    font-weight: 700;
+    fill: var(--ink-soft);
+    pointer-events: none;
+    user-select: none;
+    font-size: 10px;
+  }
+  .hex.current {
+    stroke: var(--ink) !important;
+    stroke-width: 2.5px !important;
+  }
+  .hex.current-text { fill: var(--ink); font-weight: 800; }
+  .hex.winline {
+    animation: winPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes winPulse {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(245,184,37,0)); }
+    50% { filter: drop-shadow(0 0 8px rgba(245,184,37,0.7)); }
+  }
+
+  /* Pad label */
+  .pad-label {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 6px 0 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* Number pads */
+  .numpads {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 18px 14px;
+    background: var(--cream-warm);
+    border-radius: 12px;
+    flex-wrap: wrap;
+  }
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(4, 38px);
+    grid-template-rows: repeat(3, 38px);
+    gap: 6px;
+  }
+  .pad-cell {
+    width: 38px; height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 8px;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 14px;
+    border: 1.5px solid transparent;
+    cursor: default;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .pad-cell.selected {
+    background: var(--honey);
+    color: var(--ink);
+    box-shadow: 0 3px 8px rgba(245,184,37,0.3);
+  }
+  .pad-cell.clickable {
+    cursor: pointer;
+    border-color: var(--honey);
+    animation: cellPulse 1.6s ease-in-out infinite;
+  }
+  .pad-cell.clickable:hover {
+    background: var(--honey-soft);
+    transform: translateY(-1px);
+  }
+  .pad-cell.dim { opacity: 0.35; }
+  @keyframes cellPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,184,37,0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(245,184,37,0); }
+  }
+  .times {
+    font-size: 24px;
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  /* Prompt */
+  .scenario-prompt {
+    margin-top: 4px;
+    padding: 14px 18px;
+    background: var(--honey-soft);
+    border-radius: 10px;
+    font-size: 15px;
+    color: var(--ink);
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .scenario-prompt .icon {
+    width: 22px; height: 22px;
+    background: var(--honey);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: var(--ink);
+  }
+
+  /* Caption overlay (feedback after move — pops up over the board) */
+  .caption {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(255, 253, 247, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: var(--radius);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 20;
+  }
+  .caption.show { opacity: 1; display: flex; }
+  .caption .cap-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 24px 20px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(31, 41, 55, 0.18), 0 2px 8px rgba(31, 41, 55, 0.08);
+    border: 1.5px solid var(--border);
+    border-left-width: 5px;
+    transform: translateY(10px) scale(0.97);
+    opacity: 0;
+    transition: opacity 0.4s ease 0.05s, transform 0.4s ease 0.05s;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .caption.show .cap-card { opacity: 1; transform: translateY(0) scale(1); }
+  .caption.success .cap-card {
+    border-left-color: #5A9E3A;
+    background: linear-gradient(180deg, #F2F9EC 0%, #FFFFFF 70%);
+  }
+  .caption.warn .cap-card {
+    border-left-color: var(--honey-deep);
+    background: linear-gradient(180deg, var(--honey-soft) 0%, #FFFFFF 70%);
+  }
+  .caption.info .cap-card {
+    border-left-color: #3868BC;
+    background: linear-gradient(180deg, #EEF3FC 0%, #FFFFFF 70%);
+  }
+  .caption .headline {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .caption .cap-body { color: var(--ink-soft); }
+  .caption .cap-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .caption .cap-actions .btn {
+    padding: 9px 18px;
+    font-size: 14px;
+  }
+
+  /* Continue bar */
+  .continue-bar {
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s;
+    pointer-events: none;
+  }
+  .continue-bar.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  /* Teacher lens */
+  .lens {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 720px) { .lens { grid-template-columns: 1fr; } }
+  .heatmap {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .heatmap h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: auto repeat(10, 1fr);
+    gap: 3px;
+    font-size: 11px;
+  }
+  .hcell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--cream-warm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .hcell.label { background: transparent; color: var(--ink-soft); }
+  .insights h3 { margin-bottom: 10px; }
+  .insights ul { list-style: none; }
+  .insights li {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+  .insights li:last-child { border: 0; }
+  .insights li strong { color: var(--ink); font-weight: 600; }
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .pill.green { background: #D7EDD5; color: #2F6B2A; }
+  .pill.amber { background: #FCE2B0; color: #8B5D0C; }
+  .pill.red { background: var(--red-soft); color: var(--red-deep); }
+
+  /* 12x12 multiplication grid for teacher lens */
+  .mgrid-wrap {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .mgrid-wrap h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  .mgrid {
+    display: grid;
+    grid-template-columns: 22px repeat(12, 1fr);
+    gap: 2px;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+  .mgrid .mc {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 3px;
+    color: #1F3B15;
+  }
+  .mgrid .mc.hdr {
+    background: transparent;
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 11px;
+  }
+  .mgrid .mc.secure { background: #BFDFB0; color: #1F3B15; }
+  .mgrid .mc.emerging { background: #F4D58E; color: #6B4D0C; }
+  .mgrid .mc.hesitant { background: #F3B5B3; color: #7B1E1A; }
+  .mgrid-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .mgrid-legend span::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .mgrid-legend .lg-s::before { background: #BFDFB0; }
+  .mgrid-legend .lg-e::before { background: #F4D58E; }
+  .mgrid-legend .lg-h::before { background: #F3B5B3; }
+
+  /* Engagement pullquote */
+  .pullquote {
+    margin-top: 22px;
+    padding: 20px 22px;
+    border-left: 4px solid var(--honey);
+    background: var(--amber-soft);
+    border-radius: 6px 10px 10px 6px;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    font-style: italic;
+    font-weight: 500;
+  }
+  .pullquote .pq-attrib {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  /* Mindset growth table */
+  .mindset-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    font-size: 14px;
+  }
+  .mindset-table th, .mindset-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .mindset-table thead th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: var(--cream);
+    font-weight: 700;
+  }
+  .mindset-table tbody tr:last-child td { border-bottom: none; }
+  .mindset-table .dim-label { font-weight: 600; color: var(--ink); }
+  .mindset-table .survey-n { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .mindset-table .growth {
+    font-weight: 700;
+    color: #2F6B2A;
+    font-variant-numeric: tabular-nums;
+  }
+  .mindset-table .growth::before {
+    content: "▲ ";
+    font-size: 10px;
+  }
+  .mindset-bar {
+    display: inline-block;
+    height: 6px;
+    background: #D7EDD5;
+    border-radius: 3px;
+    margin-left: 10px;
+    vertical-align: 1px;
+    min-width: 20px;
+  }
+  .mindset-footer {
+    margin-top: 16px;
+    padding: 16px 18px;
+    background: var(--cream);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .mindset-footer strong { color: var(--ink); font-weight: 600; }
+
+  /* Echo card */
+  .echo {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: var(--shadow);
+  }
+  .echo .quote {
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 500;
+    padding-left: 16px;
+    border-left: 3px solid var(--honey);
+  }
+
+  /* CTA */
+  .cta-card {
+    background: linear-gradient(180deg, #fff 0%, var(--honey-soft) 100%);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .cta-card .checks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0 24px;
+    font-size: 16px;
+    color: var(--ink-soft);
+  }
+  .cta-card .checks span::before {
+    content: "✓"; color: var(--honey-deep); font-weight: 700; margin-right: 10px;
+  }
+  .cta-card .btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* Decision pack */
+  .leader-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+  @media (max-width: 720px) { .leader-grid { grid-template-columns: 1fr; } }
+  .leader-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .leader-card h3 { margin-bottom: 10px; }
+  .leader-card p { font-size: 14px; color: var(--ink-soft); }
+  .leader-card .ico {
+    width: 34px; height: 34px;
+    background: var(--honey-soft);
+    color: var(--honey-deep);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  /* Thank you */
+  .thanks { text-align: center; padding: 60px 20px; }
+  .thanks .bee { font-size: 56px; display: block; margin-bottom: 20px; }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">🐝</div>
+      <span>Number Hive</span>
+    </div>
+    <button class="restart" onclick="restart()">Restart demo</button>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="stage">
+
+    <!-- SCREEN 1: HOOK -->
+    <section class="screen active" id="s1">
+      <div class="eyebrow">For teachers</div>
+      <h1>Which of these is most true for your students?</h1>
+      <div class="options" id="problemOptions">
+        <button class="option" data-problem="apply">
+          <span class="num">1</span>Students know facts, but can't apply them
+        </button>
+        <button class="option" data-problem="counting">
+          <span class="num">2</span>Students struggle to recall basic facts quickly
+        </button>
+        <button class="option" data-problem="freeze">
+          <span class="num">3</span>Students freeze when numbers change
+        </button>
+        <button class="option" data-problem="speed">
+          <span class="num">4</span>Students can answer quickly, but don't really understand
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: BRIDGE -->
+    <section class="screen" id="s2">
+      <div style="margin:auto; text-align:center; max-width:520px;">
+        <div class="eyebrow">Three moments from the classroom</div>
+        <h1 style="margin-bottom:16px;">Help one of your students play.</h1>
+        <p class="lead">Three scenarios. One real game. Watch what their thinking has to do.</p>
+        <div style="margin-top:32px;">
+          <button class="btn primary btn-arrow" onclick="goto(3)">Start</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: SCENARIO 1 — Help student win -->
+    <section class="screen" id="s3">
+      <div class="eyebrow">Scenario 1 of 3</div>
+      <h2>Help your student win this turn.</h2>
+      <p id="s3prompt" class="meta" style="margin-top:6px;">They've got three in a row. There's a winning move on the board — actually, two of them.</p>
+
+      <div class="game-frame">
+        <div class="player-bar">
+          <div class="player-chip active"><span class="bee">🐝</span><span>Your student</span></div>
+          <div class="turn-label">Your student's turn</div>
+          <div class="player-chip"><span class="bee">🐝</span><span>Player 2</span></div>
+        </div>
+        <div class="board-wrap">
+          <svg id="board1" class="board-svg" viewBox="0 0 320 320"></svg>
+        </div>
+        <div class="pad-label">Get 4 in a row by multiplying</div>
+        <div class="numpads" id="pads1"></div>
+        <div class="scenario-prompt">
+          <div class="icon">?</div>
+          <div>Which factor should your student change? Look for a move that lands on <strong>2</strong> or <strong>27</strong> — either completes four in a row.</div>
+        </div>
+        <div class="caption" id="caption1"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: SCENARIO 2 — Block opponent -->
+    <section class="screen" id="s4">
+      <div class="eyebrow">Scenario 2 of 3</div>
+      <h2>Stop Player 2 from winning.</h2>
+      <p id="s4prompt" class="meta" style="margin-top:6px;">Player 2 has three in a row. One move away from four. Your student has to block.</p>
+
+      <div class="game-frame">
+        <div class="player-bar">
+          <div class="player-chip active"><span class="bee">🐝</span><span>Your student</span></div>
+          <div class="turn-label">Your student's turn</div>
+          <div class="player-chip"><span class="bee">🐝</span><span>Player 2</span></div>
+        </div>
+        <div class="board-wrap">
+          <svg id="board2" class="board-svg" viewBox="0 0 320 320"></svg>
+        </div>
+        <div class="pad-label">Get 4 in a row by multiplying</div>
+        <div class="numpads" id="pads2"></div>
+        <div class="scenario-prompt">
+          <div class="icon">?</div>
+          <div>Which factor change claims <strong>28</strong> — the cell that would complete Player 2's four in a row?</div>
+        </div>
+        <div class="caption" id="caption2"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: SCENARIO 3 — Anticipate / don't leak factors -->
+    <section class="screen" id="s5">
+      <div class="eyebrow">Scenario 3 of 3</div>
+      <h2>Think one move ahead.</h2>
+      <p id="s5prompt" class="meta" style="margin-top:6px;">Player 2 needs to claim <strong>18</strong> to win. The current pads don't make 18 — but one wrong move from your student could hand it to them.</p>
+
+      <div class="game-frame">
+        <div class="player-bar">
+          <div class="player-chip active"><span class="bee">🐝</span><span>Your student</span></div>
+          <div class="turn-label">Your student's turn</div>
+          <div class="player-chip"><span class="bee">🐝</span><span>Player 2</span></div>
+        </div>
+        <div class="board-wrap">
+          <svg id="board3" class="board-svg" viewBox="0 0 320 320"></svg>
+        </div>
+        <div class="pad-label">Get 4 in a row by multiplying</div>
+        <div class="numpads" id="pads3"></div>
+        <div class="scenario-prompt">
+          <div class="icon">?</div>
+          <div>18 = 2×9, 3×6. Which change avoids leaving <strong>2, 3, 6, or 9</strong> on either pad — so Player 2 can't reach 18 next turn?</div>
+        </div>
+        <div class="caption" id="caption3"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 6: TEACHER LENS -->
+    <section class="screen" id="s6">
+      <div class="eyebrow">The teacher lens</div>
+      <h2>While they play, you see this.</h2>
+      <p class="meta" style="margin-top:6px;">Not just right or wrong — how they're thinking.</p>
+
+      <div class="lens">
+        <div class="mgrid-wrap">
+          <h4>Facts grid — Class of 28</h4>
+          <div class="mgrid" id="mgrid"></div>
+          <div class="mgrid-legend">
+            <span class="lg-s">Secure</span>
+            <span class="lg-e">Emerging</span>
+            <span class="lg-h">Hesitating</span>
+          </div>
+        </div>
+        <div class="insights">
+          <h3>What's emerging</h3>
+          <ul>
+            <li><strong>× 4 facts</strong> <span class="pill green">Secure</span></li>
+            <li><strong>× 7 facts</strong> <span class="pill red">Hesitating</span></li>
+            <li><strong>Strategic play</strong> <span class="pill green">Strong</span></li>
+            <li><strong>Reciprocal thinking</strong> <span class="pill amber">Emerging</span></li>
+            <li><strong>Flexible fluency</strong> <span class="pill amber">Emerging</span></li>
+          </ul>
+          <p class="meta" style="margin-top:14px;">Captured automatically as students play. No extra testing.</p>
+        </div>
+      </div>
+
+      <div class="pullquote">
+        "Students are super engaged. They drive their own learning and actually want to do mathematics."
+        <span class="pq-attrib">— Year 4 teacher, using Number Hive</span>
+      </div>
+
+      <div class="continue-bar show" style="margin-top:22px;">
+        <button class="btn primary btn-arrow" onclick="goto(7)">Continue</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 7: MINDSET TRACKING -->
+    <section class="screen" id="s7">
+      <div class="eyebrow">Beyond facts</div>
+      <h2>Their mindsets grow too.</h2>
+      <p class="meta" style="margin-top:6px;max-width:640px;">
+        As students play on the Number Hive app, their fluency and progress are measured — and so are their mathematical mindsets.
+      </p>
+
+      <table class="mindset-table">
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Survey 1</th>
+            <th>Survey 2</th>
+            <th>Growth</th>
+          </tr>
+        </thead>
+        <tbody id="mindsetRows"></tbody>
+      </table>
+
+      <div class="mindset-footer">
+        <strong>What this measures.</strong> Validated survey items capture how students feel about themselves as mathematicians — their <strong>confidence</strong> to tackle problems, their <strong>self‑efficacy</strong>, their <strong>attitude</strong> toward maths, their <strong>growth mindset</strong>, and the quality of their mathematical <strong>reasoning</strong>. Administered twice, so growth is visible.
+      </div>
+
+      <div class="continue-bar show" style="margin-top:22px;">
+        <button class="btn primary btn-arrow" onclick="goto(8)">Continue</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 8: CLOSE THE LOOP -->
+    <section class="screen" id="s8">
+      <div class="eyebrow">You mentioned…</div>
+      <div class="echo">
+        <div class="quote" id="echoQuote"></div>
+      </div>
+
+      <div style="margin-top:24px; max-width:620px;">
+        <h1 id="closeHeadline">This is how they build flexible fluency.</h1>
+        <p class="lead" style="margin-top:14px;" id="closeLead">
+          Your student didn't just recall facts — they applied them, adapted them, and reasoned about what comes next. Fluency isn't speed. It's strategic, flexible thinking.
+        </p>
+      </div>
+
+      <div style="margin-top:28px;">
+        <button class="btn primary btn-arrow" onclick="goto(9)">See what's next</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 9: CTA -->
+    <section class="screen" id="s9">
+      <div class="eyebrow">Try it in your classroom</div>
+      <h1>Run a Proof of Concept.</h1>
+      <p class="lead" style="margin-top:10px; max-width:560px;">
+        Students playing in under 10 minutes. Real classroom data. Something to share with your leadership team.
+      </p>
+
+      <div class="cta-card">
+        <h2>You'll get:</h2>
+        <div class="checks">
+          <span>Your class set up and playing in minutes</span>
+          <span>Live insights into how your students think</span>
+          <span>A decision pack to share with colleagues</span>
+        </div>
+        <div class="btns">
+          <button class="btn primary btn-arrow" onclick="goto(11)">Start Proof of Concept</button>
+          <button class="btn ghost" onclick="goto(10)">For school leaders →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 10: DECISION PACK -->
+    <section class="screen" id="s10">
+      <div class="eyebrow">For school leaders</div>
+      <h1>Share this with your leadership team.</h1>
+      <p class="lead" style="margin-top:10px;">A short page for decision makers — no jargon.</p>
+      <div class="leader-grid">
+        <div class="leader-card">
+          <div class="ico">1</div>
+          <h3>What it builds</h3>
+          <p>Strong number foundations. Flexible fluency — not just recall. Mathematical reasoning students can carry forward.</p>
+        </div>
+        <div class="leader-card">
+          <div class="ico">2</div>
+          <h3>What teachers see</h3>
+          <p>Live insights into student thinking. Engagement you don't have to manufacture. Evidence without extra testing.</p>
+        </div>
+        <div class="leader-card">
+          <div class="ico">3</div>
+          <h3>What schools get</h3>
+          <p>Whole-school access. Low implementation lift. A tool teachers actually keep using after week two.</p>
+        </div>
+      </div>
+      <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="btn primary btn-arrow" onclick="goto(11)">Share with leadership team</button>
+        <button class="btn ghost" onclick="goto(9)">← Back</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 11: THANK YOU -->
+    <section class="screen" id="s11">
+      <div class="thanks">
+        <span class="bee">🐝</span>
+        <h1>You're in.</h1>
+        <p class="lead" style="margin-top:14px; max-width:480px; margin-left:auto; margin-right:auto;">
+          We'll send setup instructions to your email. Your students will be playing by the end of the week.
+        </p>
+        <p class="meta" style="margin-top:24px;">
+          (Prototype — in production this lands in onboarding.)
+        </p>
+        <div style="margin-top:28px;">
+          <button class="btn ghost" onclick="restart()">Run demo again</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* ===========================================================
+   STATE
+=========================================================== */
+const state = {
+  screen: 1,
+  problem: null,     // 'apply' | 'counting' | 'freeze' | 'speed'
+  moves: { 1: null, 2: null, 3: null }
+};
+
+const PROBLEM_LABELS = {
+  apply: "Students know facts, but can't apply them",
+  counting: "Students struggle to recall basic facts quickly",
+  freeze: "Students freeze when numbers change",
+  speed: "Students can answer quickly, but don't really understand"
+};
+
+/* ===========================================================
+   BOARD: 59 products arranged in the Number Hive layout.
+   Row sizes: 5, 6, 7, 8, 7, 8, 7, 6, 5 = 59.
+   Each row has a fractional xOffset so the diamond shape works
+   with pointy-top hexes.
+=========================================================== */
+const ROWS = [
+  { offset: 1.5, products: [16, 14, 25,  6, 72] },
+  { offset: 1.0, products: [30, 35, 96, 84, 64,  8] },
+  { offset: 0.5, products: [121, 7, 108, 40,  2, 110, 28] },
+  { offset: 0.0, products: [100, 80,  4, 70, 99,  9, 49, 10] },
+  { offset: 0.5, products: [  5,  3, 77,  1, 56, 63, 32] },
+  { offset: 0.0, products: [ 18, 42, 55,144, 81, 12, 88, 60] },
+  { offset: 0.5, products: [ 45, 15, 24,120,132, 54, 27] },
+  { offset: 1.0, products: [ 36, 33, 21, 50, 66, 48] },
+  { offset: 1.5, products: [ 22, 44, 20, 90, 11] }
+];
+
+// Build an index: product value -> {row, col, x, y}
+const BOARD_INDEX = {};
+ROWS.forEach((r, row) => {
+  r.products.forEach((p, col) => {
+    BOARD_INDEX[p] = { row, col, xOffset: r.offset + col };
+  });
+});
+
+/* ===========================================================
+   SCENARIOS
+   Each scenario defines:
+   - p1Claimed: cells owned by the student (amber)
+   - p2Claimed: cells owned by opponent (red)
+   - pads: current factor selection {pad1, pad2}
+   - padMoves: map of "pad.value" -> outcome info
+   - winLine: on successful move, which 4 cells flash as 4-in-a-row
+=========================================================== */
+const SCENARIOS = {
+  1: {
+    // Help student win. Student has 88, 63, 9 in a diagonal.
+    // Winning claims: 2 (completes 88-63-9-2) OR 27 (completes 27-88-63-9).
+    // Current pads: 2 × 9 = 18 (Player 2 just played).
+    p1Claimed: [88, 63, 9],
+    p2Claimed: [18],
+    pads: { pad1: 2, pad2: 9 },
+    // Clickable pad cells and their outcomes.
+    // padMoves key format: "pad1:NEW" or "pad2:NEW"
+    padMoves: {
+      "pad1:3": { // 3 × 9 = 27, WIN
+        result: 27, outcome: "win",
+        winLine: [27, 88, 63, 9],
+        claim: 'p1'
+      },
+      "pad2:1": { // 2 × 1 = 2, WIN
+        result: 2, outcome: "win",
+        winLine: [88, 63, 9, 2],
+        claim: 'p1'
+      },
+      "pad1:4": { // 4 × 9 = 36 — distractor
+        result: 36, outcome: "miss",
+        claim: 'p1'
+      }
+    }
+  },
+  2: {
+    // Block opponent. P2 has 49, 63, 12 diagonally (SW line from top-right).
+    // They win with 28 (row 2, col 6, NE end). Student must claim 28.
+    // Current pads: 7 × 6 = 42 (P2 just played 42).
+    // Block: change pad2 6→4 to get 7×4 = 28. A harder multiplication fact.
+    p1Claimed: [35],
+    p2Claimed: [49, 63, 12, 42],
+    pads: { pad1: 7, pad2: 6 },
+    padMoves: {
+      "pad2:4": { // 7 × 4 = 28, BLOCK
+        result: 28, outcome: "block",
+        winLine: [28, 49, 63, 12],
+        claim: 'p1'
+      },
+      "pad1:5": { // 5 × 6 = 30 — distractor, doesn't block
+        result: 30, outcome: "miss-block",
+        claim: 'p1'
+      },
+      "pad2:8": { // 7 × 8 = 56 — distractor
+        result: 56, outcome: "miss-block",
+        claim: 'p1'
+      }
+    }
+  },
+  3: {
+    // Anticipation. Player 2 threatens with row 5: 42, 55, 144.
+    // They need 18 to complete 4-in-a-row (18-42-55-144).
+    // Current pads: 5 × 7 = 35 (student's last move).
+    // Neither pad is a factor of 18. Student must not leave {2, 3, 6, 9} on pads.
+    p1Claimed: [35],
+    p2Claimed: [42, 55, 144],
+    pads: { pad1: 5, pad2: 7 },
+    padMoves: {
+      "pad1:9": { // 9 × 7 = 63, BUT leaves 9 on pad — P2 plays 9→2 and claims 18
+        result: 63, outcome: "leak",
+        leakFactor: 9, leakResult: 18, leakPad: 'pad2', leakTo: 2,
+        claim: 'p1'
+      },
+      "pad2:8": { // 5 × 8 = 40, safe — neither 5 nor 8 is factor of 18
+        result: 40, outcome: "safe",
+        claim: 'p1'
+      },
+      "pad2:6": { // 5 × 6 = 30, but leaves 6 — P2 plays 5→3 and claims 18
+        result: 30, outcome: "leak",
+        leakFactor: 6, leakResult: 18, leakPad: 'pad1', leakTo: 3,
+        claim: 'p1'
+      }
+    }
+  }
+};
+
+/* ===========================================================
+   PERSONALIZED CAPTIONS
+   Mapped to the teacher's initial problem selection.
+   Theme keys: apply | counting | freeze | speed
+   Each scenario has a success/alt-success/failure message.
+=========================================================== */
+const MESSAGES = {
+  1: {
+    win: {
+      apply:    { h: "Well done. They applied what they know.", b: "Strategic use of multiplication facts — not just recall, but a reason to use them." },
+      counting: { h: "That's multiplicative reasoning.", b: "No counting strategies needed. Your student thought in factors." },
+      freeze:   { h: "Flexible thinking — there were two winning factor pairs.", b: "When the first answer didn't fit, they found another. That's fluency." },
+      speed:    { h: "That's fluency with understanding.", b: "Not speed — judgment. Your student chose the move, not just rushed to it." }
+    },
+    winAlt: { // second correct move
+      apply:    { h: "Same product, different factors.", b: "Your student spotted another path to the win. That's applied, flexible knowledge." },
+      counting: { h: "They're reasoning, not counting.", b: "Finding both 2 × 1 and 3 × 9 as winning plays takes multiplicative thinking." },
+      freeze:   { h: "Two winning pairs — they picked one.", b: "Flexible fluency means seeing more than one way through." },
+      speed:    { h: "Understanding, visible.", b: "They didn't jump — they reasoned. That's the difference between speed and fluency." }
+    },
+    miss: {
+      apply:    { h: "A real move — but not the winning one.", b: "A stronger player spots which factors actually reach the winning cell." },
+      counting: { h: "Not a win — but a good prompt for discussion.", b: "What product does your student need? What factors make it?" },
+      freeze:   { h: "Close, but not there.", b: "Two winning cells were reachable. Can they find one?" },
+      speed:    { h: "Quick move — but not strategic.", b: "The best move here takes a beat of thought, not speed." }
+    }
+  },
+  2: {
+    block: {
+      apply:    { h: "They applied a harder fact — strategically.", b: "7 × 4 = 28 isn't the easiest fact to pull up under pressure. They did it to defend." },
+      counting: { h: "That's strategic multiplication.", b: "They anticipated the opponent's win and used 7 × 4 to stop it — no counting needed." },
+      freeze:   { h: "Adaptive thinking.", b: "The board shifted. They adjusted, pulled up a tricky fact, and blocked the threat." },
+      speed:    { h: "Deliberate, strategic thinking.", b: "This isn't a reflex — it's anticipation. Reaching for 7 × 4 under pressure shows real judgment." }
+    },
+    "miss-block": {
+      apply:    { h: "A fact-correct move — but it didn't block.", b: "Which factors would land on the winning cell (28)? That's the question." },
+      counting: { h: "Not the block.", b: "The goal was to claim 28. What factors make 28?" },
+      freeze:   { h: "The opponent is still a move away from winning.", b: "Which factor change claims 28 and stops them?" },
+      speed:    { h: "Nope — that's not the block.", b: "Look at what Player 2 needs (28). Then find a factor pair that reaches it." }
+    }
+  },
+  3: {
+    safe: {
+      apply:    { h: "That's deep understanding, not just fact work.", b: "They're thinking about which factors to leave behind — not just which to use." },
+      counting: { h: "Reasoning about relationships, not numbers.", b: "This is reciprocal thinking: what's a factor of 18? Which factors are safe to leave?" },
+      freeze:   { h: "Adaptive defence.", b: "They're reading the board AND the pads. That's flexible, strategic play." },
+      speed:    { h: "Strong mathematical judgment.", b: "Understanding how factors connect — that's not something you can rush." }
+    },
+    leak: {
+      apply:    { h: "A fact-correct move — but it leaked a factor.", b: "Once that number's on the pad, the opponent can reach 18 in one change." },
+      counting: { h: "They used a fact — but didn't read the pad.", b: "2, 3, 6, 9 are factors of 18. Leaving any on the pads hands opponent the win." },
+      freeze:   { h: "The board looked safe — the pads didn't.", b: "When the numbers change, so do the threats. Did they spot it?" },
+      speed:    { h: "Quick move — strategic cost.", b: "This is where understanding beats speed. What factors make 18? Don't leave them." }
+    }
+  }
+};
+
+/* ===========================================================
+   HEX RENDERING
+=========================================================== */
+const HEX_SIZE = 17;
+const HEX_W = Math.sqrt(3) * HEX_SIZE;
+const HEX_H = 2 * HEX_SIZE;
+const HEX_V_SPACING = HEX_H * 0.75;
+const BOARD_ORIGIN_X = 20;
+const BOARD_ORIGIN_Y = 20;
+
+function hexPoints(cx, cy, r) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 180 * (60 * i - 90);
+    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+  }
+  return pts.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+}
+
+function cellAt(product) {
+  const info = BOARD_INDEX[product];
+  if (!info) return null;
+  const cx = BOARD_ORIGIN_X + info.xOffset * HEX_W;
+  const cy = BOARD_ORIGIN_Y + info.row * HEX_V_SPACING;
+  return { cx, cy, product };
+}
+
+function drawBoard(svgId, scenarioIdx) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+  const sc = SCENARIOS[scenarioIdx];
+  const currentProduct = sc.pads.pad1 * sc.pads.pad2;
+
+  ROWS.forEach((r, rowIdx) => {
+    r.products.forEach((p, colIdx) => {
+      const cx = BOARD_ORIGIN_X + (r.offset + colIdx) * HEX_W + HEX_W / 2;
+      const cy = BOARD_ORIGIN_Y + rowIdx * HEX_V_SPACING + HEX_H / 2;
+
+      let fill = '#FFFCF3';
+      let stroke = '#D8CDB0';
+      let strokeW = 1;
+      let textFill = 'var(--ink-soft)';
+      let cls = 'hex';
+
+      if (sc.p1Claimed.includes(p)) {
+        fill = 'var(--amber)';
+        stroke = 'var(--amber-deep)';
+        strokeW = 1.5;
+        textFill = '#FFFFFF';
+      } else if (sc.p2Claimed.includes(p)) {
+        fill = 'var(--red)';
+        stroke = 'var(--red-deep)';
+        strokeW = 1.5;
+        textFill = '#FFFFFF';
+      }
+
+      if (p === currentProduct) {
+        stroke = 'var(--ink)';
+        strokeW = 2.5;
+        cls += ' current';
+      }
+
+      const poly = document.createElementNS(ns, 'polygon');
+      poly.setAttribute('points', hexPoints(cx, cy, HEX_SIZE));
+      poly.setAttribute('fill', fill);
+      poly.setAttribute('stroke', stroke);
+      poly.setAttribute('stroke-width', strokeW);
+      poly.setAttribute('class', cls);
+      poly.dataset.product = p;
+      svg.appendChild(poly);
+
+      const text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', cx);
+      text.setAttribute('y', cy + 3.5);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('class', 'hex-text');
+      text.setAttribute('fill', textFill);
+      text.dataset.product = p;
+      text.textContent = p;
+      svg.appendChild(text);
+    });
+  });
+}
+
+/* Paint a claimed cell (during move animation) */
+function paintCell(svgId, product, claim, highlight = false) {
+  const svg = document.getElementById(svgId);
+  const poly = svg.querySelector(`polygon[data-product="${product}"]`);
+  const text = svg.querySelector(`text[data-product="${product}"]`);
+  if (!poly) return;
+  if (claim === 'p1') {
+    poly.setAttribute('fill', 'var(--amber)');
+    poly.setAttribute('stroke', 'var(--amber-deep)');
+    poly.setAttribute('stroke-width', '1.5');
+    text.setAttribute('fill', '#FFFFFF');
+  } else if (claim === 'p2') {
+    poly.setAttribute('fill', 'var(--red)');
+    poly.setAttribute('stroke', 'var(--red-deep)');
+    poly.setAttribute('stroke-width', '1.5');
+    text.setAttribute('fill', '#FFFFFF');
+  }
+  if (highlight) {
+    poly.classList.add('winline');
+  }
+  poly.classList.remove('current');
+}
+
+/* Highlight a cell without changing its ownership (for block animations) */
+function highlightCell(svgId, product) {
+  const svg = document.getElementById(svgId);
+  const poly = svg.querySelector(`polygon[data-product="${product}"]`);
+  if (poly) poly.classList.add('winline');
+}
+
+function flashCurrent(svgId, oldProduct, newProduct) {
+  const svg = document.getElementById(svgId);
+  // Remove current from old
+  const oldPoly = svg.querySelector(`polygon[data-product="${oldProduct}"]`);
+  if (oldPoly) oldPoly.classList.remove('current');
+  // Add current to new
+  const newPoly = svg.querySelector(`polygon[data-product="${newProduct}"]`);
+  if (newPoly) {
+    newPoly.setAttribute('stroke', 'var(--ink)');
+    newPoly.setAttribute('stroke-width', '2.5');
+    newPoly.classList.add('current');
+  }
+}
+
+/* ===========================================================
+   PAD RENDERING
+=========================================================== */
+function renderPads(containerId, scenarioIdx) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const sc = SCENARIOS[scenarioIdx];
+  container.innerHTML = '';
+
+  ['pad1', 'pad2'].forEach((padKey, padIdx) => {
+    if (padIdx === 1) {
+      const times = document.createElement('div');
+      times.className = 'times';
+      times.textContent = '×';
+      container.appendChild(times);
+    }
+    const pad = document.createElement('div');
+    pad.className = 'numpad';
+    pad.id = `${containerId}-${padKey}`;
+    for (let n = 1; n <= 12; n++) {
+      const cell = document.createElement('div');
+      cell.className = 'pad-cell';
+      cell.textContent = n;
+      cell.dataset.value = n;
+      cell.dataset.pad = padKey;
+      const selected = sc.pads[padKey];
+      if (n === selected) cell.classList.add('selected');
+      // Check if this is a featured move
+      const moveKey = `${padKey}:${n}`;
+      if (sc.padMoves[moveKey]) {
+        cell.classList.add('clickable');
+        cell.addEventListener('click', () => handleMove(scenarioIdx, moveKey));
+      } else if (n !== selected) {
+        cell.classList.add('dim');
+      }
+      pad.appendChild(cell);
+    }
+    container.appendChild(pad);
+  });
+}
+
+/* ===========================================================
+   MOVE HANDLER
+=========================================================== */
+function handleMove(scenarioIdx, moveKey) {
+  if (state.moves[scenarioIdx]) return; // already played
+  const sc = SCENARIOS[scenarioIdx];
+  const move = sc.padMoves[moveKey];
+  if (!move) return;
+
+  state.moves[scenarioIdx] = moveKey;
+
+  const [padKey, newValStr] = moveKey.split(':');
+  const newVal = parseInt(newValStr, 10);
+  const oldPads = { ...sc.pads };
+  sc.pads[padKey] = newVal;
+
+  // Update pad visuals
+  const padContainer = document.getElementById(`pads${scenarioIdx}-${padKey}`);
+  if (padContainer) {
+    padContainer.querySelectorAll('.pad-cell').forEach(c => {
+      c.classList.remove('selected', 'clickable');
+      if (parseInt(c.dataset.value, 10) === newVal) {
+        c.classList.add('selected');
+      }
+    });
+    // Disable all other pad interactions
+    const otherPad = padKey === 'pad1' ? 'pad2' : 'pad1';
+    const otherContainer = document.getElementById(`pads${scenarioIdx}-${otherPad}`);
+    if (otherContainer) {
+      otherContainer.querySelectorAll('.pad-cell').forEach(c => {
+        c.classList.remove('clickable');
+        if (!c.classList.contains('selected')) c.classList.add('dim');
+      });
+    }
+    // Disable current pad's non-selected cells
+    padContainer.querySelectorAll('.pad-cell').forEach(c => {
+      if (!c.classList.contains('selected')) c.classList.add('dim');
+    });
+  }
+
+  // Update board: claim new cell
+  const boardId = `board${scenarioIdx}`;
+  const oldProduct = oldPads.pad1 * oldPads.pad2;
+  const newProduct = sc.pads.pad1 * sc.pads.pad2;
+
+  flashCurrent(boardId, oldProduct, newProduct);
+
+  setTimeout(() => {
+    paintCell(boardId, newProduct, move.claim, move.outcome === 'win' || move.outcome === 'block');
+    if (move.winLine) {
+      if (move.outcome === 'win') {
+        // Student completed 4 in a row — paint all cells as student's
+        move.winLine.forEach(p => paintCell(boardId, p, move.claim, true));
+      } else if (move.outcome === 'block') {
+        // Student blocked P2's line — only highlight the cells, don't repaint ownership
+        move.winLine.forEach(p => highlightCell(boardId, p));
+      }
+    }
+    // For 'leak' scenario — show the opponent claiming 18
+    if (move.outcome === 'leak') {
+      setTimeout(() => {
+        // Opponent counter-move animation
+        paintCell(boardId, move.leakResult, 'p2', true);
+        // Visually update the pad that changes for opponent's move
+        const leakContainer = document.getElementById(`pads${scenarioIdx}-${move.leakPad}`);
+        if (leakContainer) {
+          leakContainer.querySelectorAll('.pad-cell').forEach(c => {
+            c.classList.remove('selected');
+            if (parseInt(c.dataset.value, 10) === move.leakTo) {
+              c.classList.remove('dim');
+              c.classList.add('selected');
+              c.style.background = 'var(--red)';
+              c.style.color = '#fff';
+              c.style.opacity = '1';
+            }
+          });
+        }
+      }, 700);
+    }
+    // Caption
+    showCaption(scenarioIdx, move);
+  }, 350);
+}
+
+/* ===========================================================
+   CAPTIONS
+=========================================================== */
+function showCaption(scenarioIdx, move) {
+  const theme = state.problem || 'apply';
+  const capEl = document.getElementById(`caption${scenarioIdx}`);
+
+  let outcomeKey = move.outcome;
+  if (scenarioIdx === 1 && move.outcome === 'win') outcomeKey = 'win';
+
+  const msgs = MESSAGES[scenarioIdx];
+  const msg = (msgs[outcomeKey] && msgs[outcomeKey][theme]) || msgs[outcomeKey]?.apply || { h: "Nice move.", b: "" };
+
+  let cls = 'info';
+  if (outcomeKey === 'win' || outcomeKey === 'block' || outcomeKey === 'safe') cls = 'success';
+  if (outcomeKey === 'miss' || outcomeKey === 'miss-block' || outcomeKey === 'leak') cls = 'warn';
+
+  // Next screen index: scenarios 1,2,3 → 4,5,6
+  const nextScreen = scenarioIdx + 3;
+
+  capEl.className = `caption ${cls}`;
+  capEl.innerHTML = `
+    <div class="cap-card">
+      <div class="headline">${msg.h}</div>
+      <div class="cap-body">${msg.b}</div>
+      <div class="cap-actions">
+        <button class="btn primary btn-arrow" onclick="goto(${nextScreen})">Continue</button>
+      </div>
+    </div>`;
+  setTimeout(() => { capEl.classList.add('show'); }, 200);
+}
+
+/* ===========================================================
+   NAVIGATION
+=========================================================== */
+function renderProgress() {
+  const visible = [1,2,3,4,5,6,7,8,9];
+  const el = document.getElementById('progress');
+  el.innerHTML = visible.map(n => {
+    let cls = 'dot';
+    if (n < state.screen) cls += ' done';
+    if (n === state.screen) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+  el.style.visibility = state.screen > 9 ? 'hidden' : 'visible';
+}
+
+function goto(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const next = document.getElementById('s' + n);
+  if (!next) return;
+  next.classList.add('active');
+  state.screen = n;
+  renderProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 6) renderMgrid();
+  if (n === 7) renderMindset();
+  if (n === 8) renderEcho();
+}
+
+function restart() {
+  state.screen = 1;
+  state.problem = null;
+  state.moves = { 1: null, 2: null, 3: null };
+  // Reset scenario state
+  SCENARIOS[1].pads = { pad1: 2, pad2: 9 };
+  SCENARIOS[2].pads = { pad1: 7, pad2: 6 };
+  SCENARIOS[3].pads = { pad1: 5, pad2: 7 };
+  [1,2,3].forEach(i => {
+    const cap = document.getElementById('caption' + i);
+    if (cap) { cap.className = 'caption'; cap.innerHTML = ''; }
+  });
+  initScenarios();
+  goto(1);
+}
+
+/* Hook: problem selection */
+document.querySelectorAll('#problemOptions .option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.problem = btn.dataset.problem;
+    customizeScenarioPrompts();
+    goto(2);
+  });
+});
+
+/* Customize scenario intros based on problem */
+function customizeScenarioPrompts() {
+  const theme = state.problem;
+  const s3 = document.getElementById('s3prompt');
+  const s4 = document.getElementById('s4prompt');
+  const s5 = document.getElementById('s5prompt');
+  const intros = {
+    apply: {
+      3: "They know their facts. Can they apply them? There's a winning move on the board — two, actually.",
+      4: "Player 2 is about to win. Your student's facts alone won't help — they need to use them strategically.",
+      5: "This is where applied fact work shows up. Which factors can they leave on the pads safely?"
+    },
+    counting: {
+      3: "Counting won't reach the winning cell fast enough. This needs multiplicative reasoning.",
+      4: "A counter can't see three moves out. Can your student read the threat?",
+      5: "Reciprocal thinking, not repeated addition. Which factors are safe to leave behind?"
+    },
+    freeze: {
+      3: "Same game, two possible winning pairs of factors. Can your student find flexibility?",
+      4: "The board has shifted. Can they adjust their thinking fast enough to defend?",
+      5: "The pads have new numbers every turn. Which change keeps the student ahead?"
+    },
+    speed: {
+      3: "Speed won't find this — judgment will. Which change wins?",
+      4: "Rushing to play leads to a miss. What's the deliberate move here?",
+      5: "This is fluency in slow motion: which factors are safe to leave on the pads?"
+    }
+  };
+  if (intros[theme]) {
+    s3.textContent = intros[theme][3];
+    s4.innerHTML = intros[theme][4] + " (What's 7 × 4?)";
+    s5.innerHTML = intros[theme][5] + " (Player 2 needs <strong>18</strong> to win.)";
+  }
+}
+
+/* Echo screen */
+function renderEcho() {
+  const q = PROBLEM_LABELS[state.problem] || "Students freeze when numbers change";
+  document.getElementById('echoQuote').textContent = `"${q}"`;
+  const themeCopy = {
+    apply:    { h: "This is how they build applied fluency.", b: "Your student didn't just know the facts — they used them to win, to block, and to anticipate. Applied, strategic, flexible thinking." },
+    counting: { h: "This is how they move beyond counting.", b: "Each decision rewarded multiplicative reasoning — not counting strategies. Fluency built in context." },
+    freeze:   { h: "This is how they learn to adapt.", b: "Three scenarios, three different demands. Your student shifted their thinking each time. That's flexible fluency." },
+    speed:    { h: "Fluency isn't speed. It's strategic thinking.", b: "Your student reasoned about facts, factors, and relationships. Not rushed — chosen. That's deep understanding." }
+  };
+  const copy = themeCopy[state.problem] || themeCopy.apply;
+  document.getElementById('closeHeadline').textContent = copy.h;
+  document.getElementById('closeLead').textContent = copy.b;
+}
+
+/* ===========================================================
+   MULTIPLICATION GRID (teacher lens)
+   12x12 grid with colour-coded strength for each fact.
+   Strength rules (simulated class data):
+     - ×1, ×2, ×10: fully secure
+     - ×3, ×4, ×5: secure, a few emerging at the higher end
+     - ×6, ×9: mixed — emerging in the middle-high range
+     - ×7, ×8: hesitating for facts > 5 (the classic gap)
+     - ×11, ×12: hesitating
+   Symmetric across the diagonal (commutative).
+=========================================================== */
+function factStrength(a, b) {
+  const [lo, hi] = a <= b ? [a, b] : [b, a];
+  // Totally secure anchors
+  if (lo === 1 || hi === 1) return 'secure';
+  if (lo === 2) return 'secure';
+  if (lo === 10 || hi === 10) return 'secure';
+  if (lo === 5 && hi <= 10) return 'secure';
+  // 11 × anything ≤ 10 is a well-known pattern — secure.
+  // Only 11×11 and 11×12 are hesitant. This rule runs BEFORE the ×7/×8
+  // catcher so 11×7 and 11×8 stay secure.
+  if (lo === 11 || hi === 11) {
+    if (lo <= 10 && hi <= 11) return 'secure';
+    return 'hesitant';
+  }
+  // Hesitating zones
+  if ((lo === 7 || lo === 8) && hi >= 6) return 'hesitant';
+  if (lo === 12 || hi === 12) {
+    if (lo === 1 || lo === 2 || lo === 10) return 'secure';
+    return 'hesitant';
+  }
+  if (lo === 6 && hi === 9) return 'hesitant';
+  // Emerging zones
+  if (lo === 3 && hi >= 8) return 'emerging';
+  if (lo === 4 && hi >= 9) return 'emerging';
+  if (lo === 6 && hi >= 7) return 'emerging';
+  if (lo === 9 && hi >= 7) return 'emerging';
+  // Default: secure
+  return 'secure';
+}
+function renderMgrid() {
+  const grid = document.getElementById('mgrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  // Corner
+  const corner = document.createElement('div');
+  corner.className = 'mc hdr';
+  corner.textContent = '×';
+  grid.appendChild(corner);
+  // Column headers 1-12
+  for (let c = 1; c <= 12; c++) {
+    const h = document.createElement('div');
+    h.className = 'mc hdr';
+    h.textContent = c;
+    grid.appendChild(h);
+  }
+  // Rows
+  for (let r = 1; r <= 12; r++) {
+    const rh = document.createElement('div');
+    rh.className = 'mc hdr';
+    rh.textContent = r;
+    grid.appendChild(rh);
+    for (let c = 1; c <= 12; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'mc ' + factStrength(r, c);
+      cell.textContent = r * c;
+      grid.appendChild(cell);
+    }
+  }
+}
+
+/* ===========================================================
+   MINDSET TRACKING
+=========================================================== */
+const MINDSET_ROWS = [
+  { dim: "Confidence",     s1: 3.1, s2: 4.2 },
+  { dim: "Self efficacy",  s1: 2.9, s2: 4.0 },
+  { dim: "Attitude",       s1: 3.4, s2: 4.4 },
+  { dim: "Growth mindset", s1: 3.2, s2: 4.3 },
+  { dim: "Reasoning",      s1: 2.8, s2: 3.9 }
+];
+function renderMindset() {
+  const tbody = document.getElementById('mindsetRows');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  MINDSET_ROWS.forEach(r => {
+    const growth = Math.round(((r.s2 - r.s1) / r.s1) * 100);
+    const barWidth = Math.min(100, growth * 2); // visual emphasis
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="dim-label">${r.dim}</td>
+      <td class="survey-n">${r.s1.toFixed(1)} / 5</td>
+      <td class="survey-n">${r.s2.toFixed(1)} / 5</td>
+      <td><span class="growth">${growth}%</span><span class="mindset-bar" style="width:${barWidth}px;"></span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ===========================================================
+   INIT
+=========================================================== */
+function initScenarios() {
+  drawBoard('board1', 1);
+  drawBoard('board2', 2);
+  drawBoard('board3', 3);
+  renderPads('pads1', 1);
+  renderPads('pads2', 2);
+  renderPads('pads3', 3);
+}
+
+initScenarios();
+renderProgress();
+</script>
+
+</body>
+</html>

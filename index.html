@@ -91,7 +91,7 @@
 
   /* Progress dots */
   .progress {
-    padding: 20px 24px 0;
+    padding: 14px 24px 0;
     display: flex;
     justify-content: center;
     gap: 7px;
@@ -112,11 +112,11 @@
     width: 100%;
     max-width: 960px;
     margin: 0 auto;
-    padding: 30px 24px 80px;
+    padding: 16px 24px 40px;
   }
   .screen {
     position: absolute;
-    inset: 30px 24px 80px;
+    inset: 16px 24px 40px;
     display: flex;
     flex-direction: column;
     opacity: 0;
@@ -143,7 +143,7 @@
     font-size: 11px;
     color: var(--honey-deep);
     font-weight: 700;
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
 
   /* Buttons */
@@ -215,8 +215,8 @@
     background: #fff;
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px 20px 24px;
-    margin-top: 20px;
+    padding: 14px 18px 16px;
+    margin-top: 12px;
     box-shadow: var(--shadow);
   }
 
@@ -225,7 +225,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
   .player-chip {
     display: flex;
@@ -238,6 +238,8 @@
     font-size: 13px;
     font-weight: 600;
     color: var(--ink-soft);
+    opacity: 0.55;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   }
   .player-chip.student {
     border-color: var(--honey-deep);
@@ -250,26 +252,37 @@
     color: var(--red-deep);
   }
   .player-chip.active {
-    box-shadow: 0 0 0 3px rgba(214, 141, 30, 0.18);
+    opacity: 1;
+    box-shadow: 0 0 0 4px rgba(214, 141, 30, 0.22);
+    transform: scale(1.03);
   }
   .player-chip.opponent.active {
-    box-shadow: 0 0 0 3px rgba(199, 59, 54, 0.18);
+    box-shadow: 0 0 0 4px rgba(199, 59, 54, 0.22);
   }
   .player-chip .bee { font-size: 18px; }
-  .turn-label {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-    text-align: center;
-    flex: 1;
-  }
 
   /* Board */
   .board-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 8px 0 16px;
+    margin: 0;
+    flex: 0 1 420px;
+  }
+  .board-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 4px 0 10px;
+  }
+  .board-row .scenario-prompt {
+    flex: 1 1 0;
+    margin: 0;
+    min-width: 0;
+  }
+  @media (max-width: 720px) {
+    .board-row { flex-direction: column; gap: 10px; }
+    .board-row .board-wrap { flex: 0 1 auto; }
   }
   .board-svg {
     display: block;
@@ -307,26 +320,17 @@
     50% { filter: drop-shadow(0 0 8px rgba(245,184,37,0.7)); }
   }
 
-  /* Pad label */
-  .pad-label {
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-    margin: 6px 0 10px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
   /* Number pads */
   .numpads {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 18px;
-    padding: 18px 14px;
+    padding: 12px 14px;
     background: var(--cream-warm);
     border-radius: 12px;
     flex-wrap: wrap;
+    margin-top: 6px;
   }
   .numpad {
     display: grid;
@@ -374,28 +378,43 @@
     font-weight: 700;
   }
 
-  /* Prompt */
+  /* Prompt — coaching note, not part of board */
   .scenario-prompt {
     margin: 4px 0 14px;
-    padding: 14px 18px;
-    background: var(--honey-soft);
+    padding: 18px 16px 14px;
+    background: #FFFDF5;
+    border: 1.5px dashed var(--honey);
     border-radius: 10px;
-    font-size: 15px;
+    font-size: 14px;
     color: var(--ink);
     font-weight: 500;
     display: flex;
     align-items: flex-start;
     gap: 10px;
     line-height: 1.5;
+    position: relative;
+  }
+  .scenario-prompt::before {
+    content: "COACHING TIP";
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--honey);
+    color: var(--ink);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    padding: 3px 8px;
+    border-radius: 4px;
   }
   .intro-line {
-    margin-top: 14px;
-    padding: 12px 16px;
+    margin-top: 10px;
+    padding: 10px 14px;
     background: var(--cream);
     border-left: 3px solid var(--honey);
     border-radius: 6px 10px 10px 6px;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.4;
     color: var(--ink-soft);
   }
   .scenario-prompt .icon {
@@ -882,17 +901,17 @@
       <div class="game-frame">
         <div class="player-bar">
           <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
-          <div class="turn-label">Your student's turn</div>
           <div class="player-chip opponent"><span class="bee">🐝</span><span>Player 2</span></div>
         </div>
-        <div class="board-wrap">
-          <svg id="board1" class="board-svg" viewBox="0 0 320 320"></svg>
+        <div class="board-row">
+          <div class="board-wrap">
+            <svg id="board1" class="board-svg" viewBox="0 0 320 320"></svg>
+          </div>
+          <div class="scenario-prompt" id="s3hint">
+            <div class="icon">?</div>
+            <div><strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.</div>
+          </div>
         </div>
-        <div class="scenario-prompt" id="s3hint">
-          <div class="icon">?</div>
-          <div><strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.</div>
-        </div>
-        <div class="pad-label">Get 4 in a row by multiplying</div>
         <div class="numpads" id="pads1"></div>
         <div class="caption" id="caption1"></div>
       </div>
@@ -907,17 +926,17 @@
       <div class="game-frame">
         <div class="player-bar">
           <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
-          <div class="turn-label">Your student's turn</div>
           <div class="player-chip opponent"><span class="bee">🐝</span><span>Player 2</span></div>
         </div>
-        <div class="board-wrap">
-          <svg id="board2" class="board-svg" viewBox="0 0 320 320"></svg>
+        <div class="board-row">
+          <div class="board-wrap">
+            <svg id="board2" class="board-svg" viewBox="0 0 320 320"></svg>
+          </div>
+          <div class="scenario-prompt" id="s4hint">
+            <div class="icon">?</div>
+            <div>What are the factors of <strong>28</strong>? Do we already have one on a pad?</div>
+          </div>
         </div>
-        <div class="scenario-prompt" id="s4hint">
-          <div class="icon">?</div>
-          <div>What are the factors of <strong>28</strong>? Do we already have one on a pad?</div>
-        </div>
-        <div class="pad-label">Get 4 in a row by multiplying</div>
         <div class="numpads" id="pads2"></div>
         <div class="caption" id="caption2"></div>
       </div>
@@ -932,17 +951,17 @@
       <div class="game-frame">
         <div class="player-bar">
           <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
-          <div class="turn-label">Your student's turn</div>
           <div class="player-chip opponent"><span class="bee">🐝</span><span>Player 2</span></div>
         </div>
-        <div class="board-wrap">
-          <svg id="board3" class="board-svg" viewBox="0 0 320 320"></svg>
+        <div class="board-row">
+          <div class="board-wrap">
+            <svg id="board3" class="board-svg" viewBox="0 0 320 320"></svg>
+          </div>
+          <div class="scenario-prompt" id="s5hint">
+            <div class="icon">?</div>
+            <div>Player 2 needs <strong>18</strong>. What can your student leave safely? (18 = 2×9 = 3×6)</div>
+          </div>
         </div>
-        <div class="scenario-prompt" id="s5hint">
-          <div class="icon">?</div>
-          <div>Player 2 needs <strong>18</strong>. What can your student leave safely? (18 = 2×9 = 3×6)</div>
-        </div>
-        <div class="pad-label">Get 4 in a row by multiplying</div>
         <div class="numpads" id="pads3"></div>
         <div class="caption" id="caption3"></div>
       </div>

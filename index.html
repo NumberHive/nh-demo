@@ -234,17 +234,26 @@
     padding: 6px 14px 6px 10px;
     border-radius: 999px;
     background: #fff;
-    border: 1.5px solid var(--border);
+    border: 2px solid var(--border);
     font-size: 13px;
     font-weight: 600;
     color: var(--ink-soft);
-    opacity: 0.5;
   }
-  .player-chip.active {
-    opacity: 1;
-    border-color: var(--honey);
+  .player-chip.student {
+    border-color: var(--honey-deep);
     background: var(--amber-soft);
     color: var(--ink);
+  }
+  .player-chip.opponent {
+    border-color: var(--red-deep);
+    background: var(--red-soft);
+    color: var(--red-deep);
+  }
+  .player-chip.active {
+    box-shadow: 0 0 0 3px rgba(214, 141, 30, 0.18);
+  }
+  .player-chip.opponent.active {
+    box-shadow: 0 0 0 3px rgba(199, 59, 54, 0.18);
   }
   .player-chip .bee { font-size: 18px; }
   .turn-label {
@@ -285,8 +294,9 @@
     font-size: 10px;
   }
   .hex.current {
-    stroke: var(--ink) !important;
-    stroke-width: 2.5px !important;
+    stroke: var(--honey-deep) !important;
+    stroke-width: 1.8px !important;
+    stroke-dasharray: 4 2;
   }
   .hex.current-text { fill: var(--ink); font-weight: 800; }
   .hex.winline {
@@ -366,7 +376,7 @@
 
   /* Prompt */
   .scenario-prompt {
-    margin-top: 4px;
+    margin: 4px 0 14px;
     padding: 14px 18px;
     background: var(--honey-soft);
     border-radius: 10px;
@@ -376,6 +386,17 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
+    line-height: 1.5;
+  }
+  .intro-line {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--cream);
+    border-left: 3px solid var(--honey);
+    border-radius: 6px 10px 10px 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-soft);
   }
   .scenario-prompt .icon {
     width: 22px; height: 22px;
@@ -743,6 +764,64 @@
   .thanks { text-align: center; padding: 60px 20px; }
   .thanks .bee { font-size: 56px; display: block; margin-bottom: 20px; }
 
+  /* Signup form */
+  .signup-card {
+    background: linear-gradient(180deg, #fff 0%, var(--honey-soft) 100%);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin: 24px auto 0;
+    max-width: 480px;
+    text-align: left;
+  }
+  .signup-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .signup-card input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+  }
+  .signup-card input[type="email"]:focus {
+    outline: none;
+    border-color: var(--honey-deep);
+    box-shadow: 0 0 0 3px rgba(214, 141, 30, 0.18);
+  }
+  .signup-card .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .signup-card .check-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--honey-deep);
+    cursor: pointer;
+  }
+  .signup-card .submit-row {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
 </style>
 </head>
 <body>
@@ -784,8 +863,8 @@
     <section class="screen" id="s2">
       <div style="margin:auto; text-align:center; max-width:520px;">
         <div class="eyebrow">Three moments from the classroom</div>
-        <h1 style="margin-bottom:16px;">Help one of your students play.</h1>
-        <p class="lead">Three scenarios. One real game. Watch what their thinking has to do.</p>
+        <h1 style="margin-bottom:16px;">Help your student play Number Hive.</h1>
+        <p class="lead">Here are three real game scenarios.</p>
         <div style="margin-top:32px;">
           <button class="btn primary btn-arrow" onclick="goto(3)">Start</button>
         </div>
@@ -795,24 +874,26 @@
     <!-- SCREEN 3: SCENARIO 1 — Help student win -->
     <section class="screen" id="s3">
       <div class="eyebrow">Scenario 1 of 3</div>
-      <h2>Help your student win this turn.</h2>
-      <p id="s3prompt" class="meta" style="margin-top:6px;">They've got three in a row. There's a winning move on the board — actually, two of them.</p>
+      <h2 id="s3title">Help your student get four cells in a row (horizontally or diagonally) to win.</h2>
+      <p id="s3prompt" class="meta" style="margin-top:6px;">They know their facts. Can they apply them? There's a winning move on the board — two, actually.</p>
+
+      <div class="intro-line">Students change one number pad to make products in the hive and connect four in a row.</div>
 
       <div class="game-frame">
         <div class="player-bar">
-          <div class="player-chip active"><span class="bee">🐝</span><span>Your student</span></div>
+          <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
           <div class="turn-label">Your student's turn</div>
-          <div class="player-chip"><span class="bee">🐝</span><span>Player 2</span></div>
+          <div class="player-chip opponent"><span class="bee">🐝</span><span>Player 2</span></div>
         </div>
         <div class="board-wrap">
           <svg id="board1" class="board-svg" viewBox="0 0 320 320"></svg>
         </div>
+        <div class="scenario-prompt" id="s3hint">
+          <div class="icon">?</div>
+          <div><strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.</div>
+        </div>
         <div class="pad-label">Get 4 in a row by multiplying</div>
         <div class="numpads" id="pads1"></div>
-        <div class="scenario-prompt">
-          <div class="icon">?</div>
-          <div>Which factor should your student change? Look for a move that lands on <strong>2</strong> or <strong>27</strong> — either completes four in a row.</div>
-        </div>
         <div class="caption" id="caption1"></div>
       </div>
     </section>
@@ -820,24 +901,24 @@
     <!-- SCREEN 4: SCENARIO 2 — Block opponent -->
     <section class="screen" id="s4">
       <div class="eyebrow">Scenario 2 of 3</div>
-      <h2>Stop Player 2 from winning.</h2>
-      <p id="s4prompt" class="meta" style="margin-top:6px;">Player 2 has three in a row. One move away from four. Your student has to block.</p>
+      <h2 id="s4title">Prevent Player 2 from winning by blocking them.</h2>
+      <p id="s4prompt" class="meta" style="margin-top:6px;">Player 2 is about to win. Facts alone won't help — they need to be used strategically.</p>
 
       <div class="game-frame">
         <div class="player-bar">
-          <div class="player-chip active"><span class="bee">🐝</span><span>Your student</span></div>
+          <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
           <div class="turn-label">Your student's turn</div>
-          <div class="player-chip"><span class="bee">🐝</span><span>Player 2</span></div>
+          <div class="player-chip opponent"><span class="bee">🐝</span><span>Player 2</span></div>
         </div>
         <div class="board-wrap">
           <svg id="board2" class="board-svg" viewBox="0 0 320 320"></svg>
         </div>
+        <div class="scenario-prompt" id="s4hint">
+          <div class="icon">?</div>
+          <div>What are the factors of <strong>28</strong>? Do we already have one on a pad?</div>
+        </div>
         <div class="pad-label">Get 4 in a row by multiplying</div>
         <div class="numpads" id="pads2"></div>
-        <div class="scenario-prompt">
-          <div class="icon">?</div>
-          <div>Which factor change claims <strong>28</strong> — the cell that would complete Player 2's four in a row?</div>
-        </div>
         <div class="caption" id="caption2"></div>
       </div>
     </section>
@@ -845,24 +926,24 @@
     <!-- SCREEN 5: SCENARIO 3 — Anticipate / don't leak factors -->
     <section class="screen" id="s5">
       <div class="eyebrow">Scenario 3 of 3</div>
-      <h2>Think one move ahead.</h2>
-      <p id="s5prompt" class="meta" style="margin-top:6px;">Player 2 needs to claim <strong>18</strong> to win. The current pads don't make 18 — but one wrong move from your student could hand it to them.</p>
+      <h2 id="s5title">Use strategic reasoning to plan ahead.</h2>
+      <p id="s5prompt" class="meta" style="margin-top:6px;">Which factors are safe to leave? Player 2 only needs the right pad to appear to win.</p>
 
       <div class="game-frame">
         <div class="player-bar">
-          <div class="player-chip active"><span class="bee">🐝</span><span>Your student</span></div>
+          <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
           <div class="turn-label">Your student's turn</div>
-          <div class="player-chip"><span class="bee">🐝</span><span>Player 2</span></div>
+          <div class="player-chip opponent"><span class="bee">🐝</span><span>Player 2</span></div>
         </div>
         <div class="board-wrap">
           <svg id="board3" class="board-svg" viewBox="0 0 320 320"></svg>
         </div>
+        <div class="scenario-prompt" id="s5hint">
+          <div class="icon">?</div>
+          <div>Player 2 needs <strong>18</strong>. What can your student leave safely? (18 = 2×9 = 3×6)</div>
+        </div>
         <div class="pad-label">Get 4 in a row by multiplying</div>
         <div class="numpads" id="pads3"></div>
-        <div class="scenario-prompt">
-          <div class="icon">?</div>
-          <div>18 = 2×9, 3×6. Which change avoids leaving <strong>2, 3, 6, or 9</strong> on either pad — so Player 2 can't reach 18 next turn?</div>
-        </div>
         <div class="caption" id="caption3"></div>
       </div>
     </section>
@@ -888,8 +969,8 @@
           <ul>
             <li><strong>× 4 facts</strong> <span class="pill green">Secure</span></li>
             <li><strong>× 7 facts</strong> <span class="pill red">Hesitating</span></li>
-            <li><strong>Strategic play</strong> <span class="pill green">Strong</span></li>
-            <li><strong>Reciprocal thinking</strong> <span class="pill amber">Emerging</span></li>
+            <li><strong>Strategic thinking</strong> <span class="pill green">Strong</span></li>
+            <li><strong>Reciprocal relationships</strong> <span class="pill amber">Emerging</span></li>
             <li><strong>Flexible fluency</strong> <span class="pill amber">Emerging</span></li>
           </ul>
           <p class="meta" style="margin-top:14px;">Captured automatically as students play. No extra testing.</p>
@@ -957,22 +1038,24 @@
     <!-- SCREEN 9: CTA -->
     <section class="screen" id="s9">
       <div class="eyebrow">Try it in your classroom</div>
-      <h1>Run a Proof of Concept.</h1>
+      <p class="lead" style="margin-bottom:8px; max-width:560px; color:var(--ink-soft); font-size:16px;">You've just seen how it works. Now try it with your class.</p>
+      <h1>Run a quick Proof of Concept.</h1>
       <p class="lead" style="margin-top:10px; max-width:560px;">
-        Students playing in under 10 minutes. Real classroom data. Something to share with your leadership team.
+        Have students playing in under 10 minutes. See real classroom data. Something you can share with your leadership team.
       </p>
 
       <div class="cta-card">
         <h2>You'll get:</h2>
         <div class="checks">
           <span>Your class set up and playing in minutes</span>
-          <span>Live insights into how your students think</span>
+          <span>Live insight into how your students think</span>
           <span>A decision pack to share with colleagues</span>
         </div>
         <div class="btns">
-          <button class="btn primary btn-arrow" onclick="goto(11)">Start Proof of Concept</button>
+          <button class="btn primary btn-arrow" onclick="goto(11)">Try it with your class →</button>
           <button class="btn ghost" onclick="goto(10)">For school leaders →</button>
         </div>
+        <p class="meta" style="margin-top:14px; font-size:13px;">No prep. No training. Just start.</p>
       </div>
     </section>
 
@@ -980,7 +1063,7 @@
     <section class="screen" id="s10">
       <div class="eyebrow">For school leaders</div>
       <h1>Share this with your leadership team.</h1>
-      <p class="lead" style="margin-top:10px;">A short page for decision makers — no jargon.</p>
+      <p class="lead" style="margin-top:10px;">A short, clear overview for decision makers.</p>
       <div class="leader-grid">
         <div class="leader-card">
           <div class="ico">1</div>
@@ -989,13 +1072,13 @@
         </div>
         <div class="leader-card">
           <div class="ico">2</div>
-          <h3>What teachers see</h3>
-          <p>Live insights into student thinking. Engagement you don't have to manufacture. Evidence without extra testing.</p>
+          <h3>Live insight into student thinking.</h3>
+          <p>Engagement you don't have to manufacture. Evidence without extra testing.</p>
         </div>
         <div class="leader-card">
           <div class="ico">3</div>
-          <h3>What schools get</h3>
-          <p>Whole-school access. Low implementation lift. A tool teachers actually keep using after week two.</p>
+          <h3>Whole-school access. Low implementation lift.</h3>
+          <p>A tool teachers keep using beyond week two.</p>
         </div>
       </div>
       <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
@@ -1004,20 +1087,29 @@
       </div>
     </section>
 
-    <!-- SCREEN 11: THANK YOU -->
+    <!-- SCREEN 11: YOU'RE IN (SIGNUP) -->
     <section class="screen" id="s11">
-      <div class="thanks">
+      <div class="thanks" style="padding: 40px 20px;">
         <span class="bee">🐝</span>
-        <h1>You're in.</h1>
-        <p class="lead" style="margin-top:14px; max-width:480px; margin-left:auto; margin-right:auto;">
-          We'll send setup instructions to your email. Your students will be playing by the end of the week.
+        <h1>You're in. Let's get your class playing.</h1>
+        <p class="lead" style="margin-top:14px; max-width:520px; margin-left:auto; margin-right:auto;">
+          This takes less than a minute.
         </p>
-        <p class="meta" style="margin-top:24px;">
+        <form class="signup-card" onsubmit="event.preventDefault(); alert('Prototype — in production this lands in onboarding.');">
+          <label for="signupEmail">Enter your email to get started</label>
+          <input type="email" id="signupEmail" placeholder="you@school.edu" required>
+          <label class="check-row" for="signupUpdates">
+            <input type="checkbox" id="signupUpdates" checked>
+            <span>Send me tips and updates</span>
+          </label>
+          <div class="submit-row">
+            <button type="submit" class="btn primary btn-arrow">Get started</button>
+            <button type="button" class="btn ghost" onclick="restart()">Run demo again</button>
+          </div>
+        </form>
+        <p class="meta" style="margin-top:20px; font-size:13px;">
           (Prototype — in production this lands in onboarding.)
         </p>
-        <div style="margin-top:28px;">
-          <button class="btn ghost" onclick="restart()">Run demo again</button>
-        </div>
       </div>
     </section>
 
@@ -1082,7 +1174,7 @@ const SCENARIOS = {
     // Winning claims: 2 (completes 88-63-9-2) OR 27 (completes 27-88-63-9).
     // Current pads: 2 × 9 = 18 (Player 2 just played).
     p1Claimed: [88, 63, 9],
-    p2Claimed: [18],
+    p2Claimed: [18, 80, 100],
     pads: { pad1: 2, pad2: 9 },
     // Clickable pad cells and their outcomes.
     // padMoves key format: "pad1:NEW" or "pad2:NEW"
@@ -1108,8 +1200,8 @@ const SCENARIOS = {
     // They win with 28 (row 2, col 6, NE end). Student must claim 28.
     // Current pads: 7 × 6 = 42 (P2 just played 42).
     // Block: change pad2 6→4 to get 7×4 = 28. A harder multiplication fact.
-    p1Claimed: [35],
-    p2Claimed: [49, 63, 12, 42],
+    p1Claimed: [35, 44, 110],
+    p2Claimed: [49, 63, 12],
     pads: { pad1: 7, pad2: 6 },
     padMoves: {
       "pad2:4": { // 7 × 4 = 28, BLOCK
@@ -1132,7 +1224,7 @@ const SCENARIOS = {
     // They need 18 to complete 4-in-a-row (18-42-55-144).
     // Current pads: 5 × 7 = 35 (student's last move).
     // Neither pad is a factor of 18. Student must not leave {2, 3, 6, 9} on pads.
-    p1Claimed: [35],
+    p1Claimed: [35, 20, 100],
     p2Claimed: [42, 55, 144],
     pads: { pad1: 5, pad2: 7 },
     padMoves: {
@@ -1163,14 +1255,14 @@ const SCENARIOS = {
 const MESSAGES = {
   1: {
     win: {
-      apply:    { h: "Well done. They applied what they know.", b: "Strategic use of multiplication facts — not just recall, but a reason to use them." },
-      counting: { h: "That's multiplicative reasoning.", b: "No counting strategies needed. Your student thought in factors." },
-      freeze:   { h: "Flexible thinking — there were two winning factor pairs.", b: "When the first answer didn't fit, they found another. That's fluency." },
-      speed:    { h: "That's fluency with understanding.", b: "Not speed — judgment. Your student chose the move, not just rushed to it." }
+      apply:    { h: "Well done. They applied what they know.", b: "Not just recall — a reason to use it." },
+      counting: { h: "That's multiplicative reasoning.", b: "No counting — they thought in factors." },
+      freeze:   { h: "Flexible thinking — there were two winning factor pairs.", b: "They adjusted when the first didn't fit." },
+      speed:    { h: "That's fluency with understanding.", b: "Not speed — decision making. They chose the move, not just rushed to it." }
     },
-    winAlt: { // second correct move
-      apply:    { h: "Same product, different factors.", b: "Your student spotted another path to the win. That's applied, flexible knowledge." },
-      counting: { h: "They're reasoning, not counting.", b: "Finding both 2 × 1 and 3 × 9 as winning plays takes multiplicative thinking." },
+    winAlt: {
+      apply:    { h: "Same product, different factors.", b: "Another path to the same win. That's applied, flexible knowledge." },
+      counting: { h: "They're reasoning, not counting.", b: "Seeing more than one factor pair for the same product — that's multiplicative thinking." },
       freeze:   { h: "Two winning pairs — they picked one.", b: "Flexible fluency means seeing more than one way through." },
       speed:    { h: "Understanding, visible.", b: "They didn't jump — they reasoned. That's the difference between speed and fluency." }
     },
@@ -1183,10 +1275,10 @@ const MESSAGES = {
   },
   2: {
     block: {
-      apply:    { h: "They applied a harder fact — strategically.", b: "7 × 4 = 28 isn't the easiest fact to pull up under pressure. They did it to defend." },
-      counting: { h: "That's strategic multiplication.", b: "They anticipated the opponent's win and used 7 × 4 to stop it — no counting needed." },
-      freeze:   { h: "Adaptive thinking.", b: "The board shifted. They adjusted, pulled up a tricky fact, and blocked the threat." },
-      speed:    { h: "Deliberate, strategic thinking.", b: "This isn't a reflex — it's anticipation. Reaching for 7 × 4 under pressure shows real judgment." }
+      apply:    { h: "They used a harder fact — strategically.", b: "They didn't just know it. They used it to defend." },
+      counting: { h: "That's strategic multiplication.", b: "They used 7 × 4 to stop the win." },
+      freeze:   { h: "Adaptive thinking.", b: "They adjusted and used a harder fact." },
+      speed:    { h: "Deliberate, strategic thinking.", b: "Not a reflex — anticipation. They made the right call under pressure." }
     },
     "miss-block": {
       apply:    { h: "A fact-correct move — but it didn't block.", b: "Which factors would land on the winning cell (28)? That's the question." },
@@ -1197,10 +1289,10 @@ const MESSAGES = {
   },
   3: {
     safe: {
-      apply:    { h: "That's deep understanding, not just fact work.", b: "They're thinking about which factors to leave behind — not just which to use." },
-      counting: { h: "Reasoning about relationships, not numbers.", b: "This is reciprocal thinking: what's a factor of 18? Which factors are safe to leave?" },
-      freeze:   { h: "Adaptive defence.", b: "They're reading the board AND the pads. That's flexible, strategic play." },
-      speed:    { h: "Strong mathematical judgment.", b: "Understanding how factors connect — that's not something you can rush." }
+      apply:    { h: "That's deep understanding, not just fact work.", b: "They're thinking about what to leave, not just what to use." },
+      counting: { h: "Reasoning about relationships, not numbers.", b: "That's how students move beyond counting." },
+      freeze:   { h: "Adaptive thinking.", b: "They're reading the board and the pads." },
+      speed:    { h: "Strong mathematical thinking.", b: "Understanding how factors connect — that can't be rushed." }
     },
     leak: {
       apply:    { h: "A fact-correct move — but it leaked a factor.", b: "Once that number's on the pad, the opponent can reach 18 in one change." },
@@ -1551,39 +1643,93 @@ document.querySelectorAll('#problemOptions .option').forEach(btn => {
   });
 });
 
-/* Customize scenario intros based on problem */
+/* Customize scenario titles, leads, and hints based on the teacher's chosen pathway */
+const PATHWAY_CONTENT = {
+  apply: {
+    3: {
+      title: "Help your student get four cells in a row (horizontally or diagonally) to win.",
+      lead:  "They know their facts. Can they apply them? There's a winning move on the board — two, actually.",
+      hint:  '<strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.'
+    },
+    4: {
+      title: "Prevent them from winning by blocking them.",
+      lead:  "Player 2 is about to win. Facts alone won't help — they need to be used strategically.",
+      hint:  'What are the factors of <strong>28</strong>? Do we already have one on a pad?'
+    },
+    5: {
+      title: "Using strategic reasoning to plan ahead.",
+      lead:  "Which factors are safe to leave?",
+      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely? (18 = 2×9 = 3×6)'
+    }
+  },
+  counting: {
+    3: {
+      title: "Counting strategies take too long.",
+      lead:  "This needs multiplicative reasoning.",
+      hint:  'Look for a factor relationship — not a counting path. They need to reach <strong>2</strong> or <strong>27</strong>.'
+    },
+    4: {
+      title: "Stop Player 2 from winning.",
+      lead:  "They need to anticipate and act.",
+      hint:  'What gets them to <strong>28</strong>?'
+    },
+    5: {
+      title: "Think one move ahead.",
+      lead:  "Which factors are safe to leave?",
+      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely?'
+    }
+  },
+  freeze: {
+    3: {
+      title: "Same game, two possible winning pairs of factors.",
+      lead:  "Can your student find flexibility?",
+      hint:  'They need <strong>2</strong> or <strong>27</strong> — two different winning paths.'
+    },
+    4: {
+      title: "A new scenario. Can they adapt?",
+      lead:  "The board has shifted. They need to adjust their thinking.",
+      hint:  'What gets them to <strong>28</strong>?'
+    },
+    5: {
+      title: "Each turn, your opponent changes the pads.",
+      lead:  "What keeps your student ahead?",
+      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely?'
+    }
+  },
+  speed: {
+    3: {
+      title: "Speed won't find this — decision making will.",
+      lead:  "Which move wins?",
+      hint:  'They need to reach <strong>2</strong> or <strong>27</strong>. Which pad change gets them there?'
+    },
+    4: {
+      title: "Rushing leads to mistakes.",
+      lead:  "What's the deliberate move?",
+      hint:  'What gets them to <strong>28</strong>?'
+    },
+    5: {
+      title: "Fluency in slow motion.",
+      lead:  "Which factors are safe to leave?",
+      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely?'
+    }
+  }
+};
+
 function customizeScenarioPrompts() {
   const theme = state.problem;
-  const s3 = document.getElementById('s3prompt');
-  const s4 = document.getElementById('s4prompt');
-  const s5 = document.getElementById('s5prompt');
-  const intros = {
-    apply: {
-      3: "They know their facts. Can they apply them? There's a winning move on the board — two, actually.",
-      4: "Player 2 is about to win. Your student's facts alone won't help — they need to use them strategically.",
-      5: "This is where applied fact work shows up. Which factors can they leave on the pads safely?"
-    },
-    counting: {
-      3: "Counting won't reach the winning cell fast enough. This needs multiplicative reasoning.",
-      4: "A counter can't see three moves out. Can your student read the threat?",
-      5: "Reciprocal thinking, not repeated addition. Which factors are safe to leave behind?"
-    },
-    freeze: {
-      3: "Same game, two possible winning pairs of factors. Can your student find flexibility?",
-      4: "The board has shifted. Can they adjust their thinking fast enough to defend?",
-      5: "The pads have new numbers every turn. Which change keeps the student ahead?"
-    },
-    speed: {
-      3: "Speed won't find this — judgment will. Which change wins?",
-      4: "Rushing to play leads to a miss. What's the deliberate move here?",
-      5: "This is fluency in slow motion: which factors are safe to leave on the pads?"
+  const content = PATHWAY_CONTENT[theme];
+  if (!content) return;
+  [3, 4, 5].forEach(n => {
+    const titleEl = document.getElementById(`s${n}title`);
+    const leadEl  = document.getElementById(`s${n}prompt`);
+    const hintEl  = document.getElementById(`s${n}hint`);
+    if (titleEl) titleEl.textContent = content[n].title;
+    if (leadEl)  leadEl.innerHTML    = content[n].lead;
+    if (hintEl) {
+      // Hint has an icon + text structure; preserve the icon div.
+      hintEl.innerHTML = `<div class="icon">?</div><div>${content[n].hint}</div>`;
     }
-  };
-  if (intros[theme]) {
-    s3.textContent = intros[theme][3];
-    s4.innerHTML = intros[theme][4] + " (What's 7 × 4?)";
-    s5.innerHTML = intros[theme][5] + " (Player 2 needs <strong>18</strong> to win.)";
-  }
+  });
 }
 
 /* Echo screen */

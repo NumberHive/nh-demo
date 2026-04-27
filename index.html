@@ -416,6 +416,67 @@
     line-height: 1.4;
     color: var(--ink-soft);
   }
+
+  /* Name capture */
+  .name-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+    margin: 24px auto 0;
+    width: 100%;
+  }
+  .name-form input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .name-form input[type="text"]:focus {
+    border-color: var(--honey-deep);
+    box-shadow: 0 0 0 3px rgba(214, 141, 30, 0.18);
+  }
+  .name-form .skip {
+    background: none;
+    border: none;
+    padding: 6px;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .name-form .skip:hover { color: var(--ink); }
+
+  /* Pain-specific context card above scenario */
+  .context-card {
+    margin: 0 0 12px;
+    padding: 12px 16px;
+    background: var(--honey-soft);
+    border: 1px solid rgba(214, 141, 30, 0.25);
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .context-card strong { color: var(--honey-deep); }
+  .context-card em { font-style: italic; color: var(--ink); }
+  .context-card .you-said {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--honey-deep);
+    margin-bottom: 4px;
+  }
   .scenario-prompt .icon {
     width: 22px; height: 22px;
     background: var(--honey);
@@ -877,15 +938,17 @@
       </div>
     </section>
 
-    <!-- SCREEN 2: BRIDGE -->
+    <!-- SCREEN 2: BRIDGE + NAME CAPTURE -->
     <section class="screen" id="s2">
       <div style="margin:auto; text-align:center; max-width:520px;">
-        <div class="eyebrow">Three moments from the classroom</div>
-        <h1 style="margin-bottom:16px;">Help your student play Number Hive.</h1>
-        <p class="lead">Here are three real game scenarios.</p>
-        <div style="margin-top:32px;">
-          <button class="btn primary btn-arrow" onclick="goto(3)">Start</button>
-        </div>
+        <div class="eyebrow">Make it personal</div>
+        <h1 style="margin-bottom:14px;">Think of a student who fits that.</h1>
+        <p class="lead">Enter their first name. You'll see three real game scenarios through their experience.</p>
+        <form class="name-form" onsubmit="event.preventDefault(); confirmName();">
+          <input type="text" id="studentNameInput" placeholder="e.g. Jamie" maxlength="24" autocomplete="off">
+          <button type="submit" class="btn primary btn-arrow">Start →</button>
+          <button type="button" class="skip" onclick="skipName()">Skip — use a placeholder student</button>
+        </form>
       </div>
     </section>
 
@@ -894,6 +957,8 @@
       <div class="eyebrow">Scenario 1 of 3</div>
       <h2 id="s3title">Help your student get four cells in a row (horizontally or diagonally) to win.</h2>
       <p id="s3prompt" class="meta" style="margin-top:6px;">They know their facts. Can they apply them? There's a winning move on the board — two, actually.</p>
+
+      <div class="context-card" id="contextS3" style="display:none;"></div>
 
       <div class="intro-line">Students change one number pad to make products in the hive and connect four in a row.</div>
 
@@ -922,6 +987,8 @@
       <h2 id="s4title">Prevent Player 2 from winning by blocking them.</h2>
       <p id="s4prompt" class="meta" style="margin-top:6px;">Player 2 is about to win. Facts alone won't help — they need to be used strategically.</p>
 
+      <div class="context-card" id="contextS4" style="display:none;"></div>
+
       <div class="game-frame">
         <div class="player-bar">
           <div class="player-chip student active"><span class="bee">🐝</span><span>Your student</span></div>
@@ -946,6 +1013,8 @@
       <div class="eyebrow">Scenario 3 of 3</div>
       <h2 id="s5title">Use strategic reasoning to plan ahead.</h2>
       <p id="s5prompt" class="meta" style="margin-top:6px;">Which factors are safe to leave? Player 2 only needs the right pad to appear to win.</p>
+
+      <div class="context-card" id="contextS5" style="display:none;"></div>
 
       <div class="game-frame">
         <div class="player-bar">
@@ -1017,8 +1086,8 @@
         <thead>
           <tr>
             <th>Dimension</th>
-            <th>Survey 1</th>
-            <th>Survey 2</th>
+            <th>Term 1</th>
+            <th>Term 3</th>
             <th>Growth</th>
           </tr>
         </thead>
@@ -1068,6 +1137,7 @@
           <span>Your class set up and playing in minutes</span>
           <span>Live insight into how your students think</span>
           <span>A decision pack to share with colleagues</span>
+          <span>An invite for 2–3 other teachers to trial alongside you</span>
         </div>
         <div class="btns">
           <button class="btn primary btn-arrow" onclick="goto(11)">Try it with your class →</button>
@@ -1109,7 +1179,7 @@
     <section class="screen" id="s11">
       <div class="thanks" style="padding: 40px 20px;">
         <span class="bee">🐝</span>
-        <h1>You're in. Let's get your class playing.</h1>
+        <h1 id="signupHeadline">You're in. Let's get your class playing.</h1>
         <p class="lead" style="margin-top:14px; max-width:520px; margin-left:auto; margin-right:auto;">
           This takes less than a minute.
         </p>
@@ -1141,8 +1211,13 @@
 const state = {
   screen: 1,
   problem: null,     // 'apply' | 'counting' | 'freeze' | 'speed'
+  studentName: '',   // capitalised first name, or '' for placeholder
   moves: { 1: null, 2: null, 3: null }
 };
+
+function nameOrThey()    { return state.studentName || 'Your student'; }
+function nameOrTheyLow() { return state.studentName || 'your student'; }
+function namePoss()      { return state.studentName ? state.studentName + "'s" : "your student's"; }
 
 const PROBLEM_LABELS = {
   apply: "Students know facts, but can't apply them",
@@ -1632,6 +1707,7 @@ function goto(n) {
 function restart() {
   state.screen = 1;
   state.problem = null;
+  state.studentName = '';
   state.moves = { 1: null, 2: null, 3: null };
   // Reset scenario state
   SCENARIOS[1].pads = { pad1: 2, pad2: 9 };
@@ -1640,6 +1716,15 @@ function restart() {
   [1,2,3].forEach(i => {
     const cap = document.getElementById('caption' + i);
     if (cap) { cap.className = 'caption'; cap.innerHTML = ''; }
+  });
+  // Reset name input + chips
+  const nameInput = document.getElementById('studentNameInput');
+  if (nameInput) nameInput.value = '';
+  applyName();
+  // Hide context cards
+  [3, 4, 5].forEach(n => {
+    const c = document.getElementById(`contextS${n}`);
+    if (c) c.style.display = 'none';
   });
   initScenarios();
   goto(1);
@@ -1654,13 +1739,46 @@ document.querySelectorAll('#problemOptions .option').forEach(btn => {
   });
 });
 
+/* Name capture from bridge screen */
+function confirmName() {
+  const raw = (document.getElementById('studentNameInput')?.value || '').trim();
+  if (raw) {
+    state.studentName = raw.charAt(0).toUpperCase() + raw.slice(1);
+  } else {
+    state.studentName = '';
+  }
+  applyName();
+  customizeScenarioPrompts();
+  goto(3);
+}
+function skipName() {
+  state.studentName = '';
+  applyName();
+  customizeScenarioPrompts();
+  goto(3);
+}
+function applyName() {
+  const label = nameOrThey();
+  // Update student player chip across scenarios
+  document.querySelectorAll('.player-chip.student span:last-child').forEach(el => {
+    el.textContent = label;
+  });
+  // Update signup screen headline
+  const signupH = document.getElementById('signupHeadline');
+  if (signupH) {
+    signupH.textContent = state.studentName
+      ? `You're in. Let's get ${state.studentName}'s class playing.`
+      : `You're in. Let's get your class playing.`;
+  }
+}
+
 /* Customize scenario titles, leads, and hints based on the teacher's chosen pathway */
 const PATHWAY_CONTENT = {
   apply: {
     3: {
       title: "Help your student get four cells in a row (horizontally or diagonally) to win.",
       lead:  "They know their facts. Can they apply them? There's a winning move on the board — two, actually.",
-      hint:  '<strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.'
+      hint:  '<strong>{NAME} can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.'
     },
     4: {
       title: "Prevent them from winning by blocking them.",
@@ -1726,19 +1844,61 @@ const PATHWAY_CONTENT = {
   }
 };
 
+/* Pain-specific context cards above each scenario.
+   Use {NAME} for capitalised name (or "Your student" fallback) and
+   {name} for lowercase ("your student" fallback). */
+const CONTEXT_CARDS = {
+  apply: {
+    3: "You said students know facts but can't apply them flexibly. Watch what happens when <strong>{NAME}</strong> has to use that knowledge in a real game decision — the hive forces application, not just recall.",
+    4: "This is where it gets interesting. <strong>{NAME}</strong> can't just remember 4×7=28 — they need to decide whether claiming that cell is the right move <em>right now</em>.",
+    5: "The highest level of flexible fluency: holding multiple factor pairs in mind while reasoning about what's safe to leave. This is where <strong>{NAME}</strong> goes beyond fact knowledge."
+  },
+  counting: {
+    3: "You said students struggle with quick recall. The game creates gentle pressure to retrieve facts, but in a low-stakes, engaging context. <strong>{NAME}</strong> doesn't feel tested.",
+    4: "Repeated retrieval practice, embedded in play. <strong>{NAME}</strong> will encounter the same facts dozens of times across a game without it feeling like drill.",
+    5: "By this point in the game, <strong>{NAME}</strong> has retrieved the ×9 and ×6 facts multiple times. That repetition builds the automaticity you're looking for."
+  },
+  freeze: {
+    3: "You said students freeze when context changes. The hive board randomises factor positions — there's no pattern to memorise. <strong>{NAME}</strong> has to reason afresh each time.",
+    4: "New scenario, new arrangement. <strong>{NAME}</strong> can't fall back on a memorised layout — they have to apply their knowledge flexibly. Exactly the skill you want to build.",
+    5: "This is the scenario that challenges freezing most directly. <strong>{NAME}</strong> has to hold two possible threats in mind at once and reason about which is more dangerous."
+  },
+  speed: {
+    3: "You said students answer quickly but don't really understand why. Watch what happens when <strong>{NAME}</strong> hits this scenario — speed alone isn't enough. They need to understand the relationships.",
+    4: "A student who pattern-matches won't see this block until it's too late. <strong>{NAME}</strong> needs to understand why 4×7=28 matters <em>in this moment</em>.",
+    5: "This is the real test of understanding. <strong>{NAME}</strong> has to reason about which factor combinations are dangerous — not just retrieve a fact. Understanding, not speed."
+  }
+};
+
+function fillName(str) {
+  return (str || '')
+    .replace(/\{NAME\}/g, nameOrThey())
+    .replace(/\{name\}/g, nameOrTheyLow());
+}
+
 function customizeScenarioPrompts() {
   const theme = state.problem;
   const content = PATHWAY_CONTENT[theme];
   if (!content) return;
+  const ctx = CONTEXT_CARDS[theme] || {};
   [3, 4, 5].forEach(n => {
     const titleEl = document.getElementById(`s${n}title`);
     const leadEl  = document.getElementById(`s${n}prompt`);
     const hintEl  = document.getElementById(`s${n}hint`);
-    if (titleEl) titleEl.textContent = content[n].title;
-    if (leadEl)  leadEl.innerHTML    = content[n].lead;
+    const ctxEl   = document.getElementById(`contextS${n}`);
+    if (titleEl) titleEl.textContent = fillName(content[n].title);
+    if (leadEl)  leadEl.innerHTML    = fillName(content[n].lead);
     if (hintEl) {
       // Hint has an icon + text structure; preserve the icon div.
-      hintEl.innerHTML = `<div class="icon">?</div><div>${content[n].hint}</div>`;
+      hintEl.innerHTML = `<div class="icon">?</div><div>${fillName(content[n].hint)}</div>`;
+    }
+    if (ctxEl) {
+      if (ctx[n] && state.studentName) {
+        ctxEl.innerHTML = `<span class="you-said">You said…</span>${fillName(ctx[n])}`;
+        ctxEl.style.display = 'block';
+      } else {
+        ctxEl.style.display = 'none';
+      }
     }
   });
 }
@@ -1833,11 +1993,11 @@ function renderMgrid() {
    MINDSET TRACKING
 =========================================================== */
 const MINDSET_ROWS = [
-  { dim: "Confidence",     s1: 3.1, s2: 4.2 },
-  { dim: "Self efficacy",  s1: 2.9, s2: 4.0 },
-  { dim: "Attitude",       s1: 3.4, s2: 4.4 },
-  { dim: "Growth mindset", s1: 3.2, s2: 4.3 },
-  { dim: "Reasoning",      s1: 2.8, s2: 3.9 }
+  { dim: "Confidence",            s1: 3.1, s2: 4.2 },
+  { dim: "Self-efficacy",         s1: 2.9, s2: 4.0 },
+  { dim: "Attitude toward maths", s1: 3.4, s2: 4.4 },
+  { dim: "Growth mindset",        s1: 3.2, s2: 4.3 },
+  { dim: "Mathematical reasoning",s1: 2.8, s2: 3.9 }
 ];
 function renderMindset() {
   const tbody = document.getElementById('mindsetRows');

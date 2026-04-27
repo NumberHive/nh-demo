@@ -271,18 +271,16 @@
   }
   .board-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
     margin: 4px 0 10px;
   }
+  .board-row .board-wrap { flex: 0 1 auto; }
   .board-row .scenario-prompt {
-    flex: 1 1 0;
     margin: 0;
-    min-width: 0;
-  }
-  @media (max-width: 720px) {
-    .board-row { flex-direction: column; gap: 10px; }
-    .board-row .board-wrap { flex: 0 1 auto; }
+    width: 100%;
+    max-width: 520px;
   }
   .board-svg {
     display: block;

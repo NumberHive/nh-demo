@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Number Hive — Demo Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* =========================================================
      NUMBER HIVE DEMO — Clickable Prototype V2
@@ -37,11 +40,12 @@
     height: 100%;
     background: var(--cream);
     color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
   }
+  .serif { font-family: 'Fraunces', Georgia, "Times New Roman", serif; }
 
   #app {
     min-height: 100vh;
@@ -131,19 +135,30 @@
   }
 
   /* Typography */
-  h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; line-height: 1.15; color: var(--ink); }
-  h1 { font-size: clamp(28px, 4vw, 40px); }
-  h2 { font-size: clamp(22px, 3vw, 28px); }
-  h3 { font-size: 18px; font-weight: 600; }
-  p.lead { font-size: 18px; color: var(--ink-soft); }
-  p.meta { font-size: 14px; color: var(--muted); }
+  h1, h2 {
+    font-family: 'Fraunces', Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  h1 { font-size: clamp(30px, 4.4vw, 44px); font-weight: 700; }
+  h2 { font-size: clamp(22px, 3vw, 30px); }
+  h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  p.lead {
+    font-size: 17px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  p.meta { font-size: 14px; color: var(--muted); line-height: 1.55; }
   .eyebrow {
     text-transform: uppercase;
     letter-spacing: 0.14em;
     font-size: 11px;
     color: var(--honey-deep);
-    font-weight: 700;
-    margin-bottom: 8px;
+    font-weight: 600;
+    margin-bottom: 10px;
   }
 
   /* Buttons */
@@ -921,19 +936,20 @@
     <!-- SCREEN 1: HOOK -->
     <section class="screen active" id="s1">
       <div class="eyebrow">For teachers</div>
-      <h1>Which of these is most true for your students?</h1>
+      <h1>Which feels most true for your students?</h1>
+      <p class="lead" style="margin-top:8px; margin-bottom:20px;">Your answer shapes what you see next.</p>
       <div class="options" id="problemOptions">
         <button class="option" data-problem="apply">
-          <span class="num">1</span>Students know facts, but can't apply them
+          <span class="num">01</span>They know their facts — but can't apply them flexibly
         </button>
         <button class="option" data-problem="counting">
-          <span class="num">2</span>Students struggle to recall basic facts quickly
+          <span class="num">02</span>They struggle to recall basic facts quickly
         </button>
         <button class="option" data-problem="freeze">
-          <span class="num">3</span>Students freeze when numbers change
+          <span class="num">03</span>They freeze when numbers change or context shifts
         </button>
         <button class="option" data-problem="speed">
-          <span class="num">4</span>Students can answer quickly, but don't really understand
+          <span class="num">04</span>They answer fast, but don't really understand why
         </button>
       </div>
     </section>
@@ -941,12 +957,12 @@
     <!-- SCREEN 2: BRIDGE + NAME CAPTURE -->
     <section class="screen" id="s2">
       <div style="margin:auto; text-align:center; max-width:520px;">
-        <div class="eyebrow">Make it personal</div>
-        <h1 style="margin-bottom:14px;">Think of a student who fits that.</h1>
-        <p class="lead">Enter their first name. You'll see three real game scenarios through their experience.</p>
+        <div class="eyebrow">Make it real</div>
+        <h1 style="margin-bottom:14px;">Think of a student who fits that description.</h1>
+        <p class="lead">Enter their first name — you'll see the demo through their experience.</p>
         <form class="name-form" onsubmit="event.preventDefault(); confirmName();">
           <input type="text" id="studentNameInput" placeholder="e.g. Jamie" maxlength="24" autocomplete="off">
-          <button type="submit" class="btn primary btn-arrow">Start →</button>
+          <button type="submit" class="btn primary btn-arrow">Continue →</button>
           <button type="button" class="skip" onclick="skipName()">Skip — use a placeholder student</button>
         </form>
       </div>
@@ -1037,9 +1053,9 @@
 
     <!-- SCREEN 6: TEACHER LENS -->
     <section class="screen" id="s6">
-      <div class="eyebrow">The teacher lens</div>
+      <div class="eyebrow">The teacher view</div>
       <h2>While they play, you see this.</h2>
-      <p class="meta" style="margin-top:6px;">Not just right or wrong — how they're thinking.</p>
+      <p class="meta" style="margin-top:6px;">Not just right or wrong — how they're actually thinking. Captured automatically. No extra testing.</p>
 
       <div class="lens">
         <div class="mgrid-wrap">
@@ -1077,9 +1093,9 @@
     <!-- SCREEN 7: MINDSET TRACKING -->
     <section class="screen" id="s7">
       <div class="eyebrow">Beyond facts</div>
-      <h2>Their mindsets grow too.</h2>
-      <p class="meta" style="margin-top:6px;max-width:640px;">
-        As students play on the Number Hive app, their fluency and progress are measured — and so are their mathematical mindsets.
+      <h2>Their relationship with maths grows too.</h2>
+      <p class="lead" style="margin-top:10px; max-width:640px;">
+        Validated surveys administered twice a year capture how students feel about themselves as mathematicians — not just what they can do.
       </p>
 
       <table class="mindset-table">
@@ -1095,7 +1111,7 @@
       </table>
 
       <div class="mindset-footer">
-        <strong>What this measures.</strong> Validated survey items capture how students feel about themselves as mathematicians — their <strong>confidence</strong> to tackle problems, their <strong>self‑efficacy</strong>, their <strong>attitude</strong> toward maths, their <strong>growth mindset</strong>, and the quality of their mathematical <strong>reasoning</strong>. Administered twice, so growth is visible.
+        <strong>What this measures.</strong> Validated survey items capture how students feel about themselves as mathematicians. Administered at the start and end of the year, so growth is visible — and shareable with leadership.
       </div>
 
       <div class="continue-bar show" style="margin-top:22px;">
@@ -1124,11 +1140,11 @@
 
     <!-- SCREEN 9: CTA -->
     <section class="screen" id="s9">
-      <div class="eyebrow">Try it in your classroom</div>
-      <p class="lead" style="margin-bottom:8px; max-width:560px; color:var(--ink-soft); font-size:16px;">You've just seen how it works. Now try it with your class.</p>
-      <h1>Run a quick Proof of Concept.</h1>
-      <p class="lead" style="margin-top:10px; max-width:560px;">
-        Have students playing in under 10 minutes. See real classroom data. Something you can share with your leadership team.
+      <div class="eyebrow">Try it with your class</div>
+      <p class="lead" style="margin-bottom:8px; max-width:560px; color:var(--ink-soft); font-size:16px;">You've just seen how it works. Now try it for real.</p>
+      <h1>Run a proof of concept in the next two weeks.</h1>
+      <p class="lead" style="margin-top:12px; max-width:580px;">
+        Students playing in under 10 minutes. Real classroom data. Something you can put in front of your leadership team.
       </p>
 
       <div class="cta-card">
@@ -1181,17 +1197,17 @@
         <span class="bee">🐝</span>
         <h1 id="signupHeadline">You're in. Let's get your class playing.</h1>
         <p class="lead" style="margin-top:14px; max-width:520px; margin-left:auto; margin-right:auto;">
-          This takes less than a minute.
+          Takes less than two minutes. No credit card, no commitment.
         </p>
         <form class="signup-card" onsubmit="event.preventDefault(); alert('Prototype — in production this lands in onboarding.');">
-          <label for="signupEmail">Enter your email to get started</label>
+          <label for="signupEmail">Your school email address</label>
           <input type="email" id="signupEmail" placeholder="you@school.edu" required>
           <label class="check-row" for="signupUpdates">
             <input type="checkbox" id="signupUpdates" checked>
-            <span>Send me tips and updates</span>
+            <span>Send me tips and classroom ideas</span>
           </label>
           <div class="submit-row">
-            <button type="submit" class="btn primary btn-arrow">Get started</button>
+            <button type="submit" class="btn primary btn-arrow">Start my free trial</button>
             <button type="button" class="btn ghost" onclick="restart()">Run demo again</button>
           </div>
         </form>
@@ -1220,10 +1236,10 @@ function nameOrTheyLow() { return state.studentName || 'your student'; }
 function namePoss()      { return state.studentName ? state.studentName + "'s" : "your student's"; }
 
 const PROBLEM_LABELS = {
-  apply: "Students know facts, but can't apply them",
-  counting: "Students struggle to recall basic facts quickly",
-  freeze: "Students freeze when numbers change",
-  speed: "Students can answer quickly, but don't really understand"
+  apply: "They know their facts — but can't apply them flexibly",
+  counting: "They struggle to recall basic facts quickly",
+  freeze: "They freeze when numbers change or context shifts",
+  speed: "They answer fast, but don't really understand why"
 };
 
 /* ===========================================================
@@ -1776,70 +1792,70 @@ function applyName() {
 const PATHWAY_CONTENT = {
   apply: {
     3: {
-      title: "Help your student get four cells in a row (horizontally or diagonally) to win.",
-      lead:  "They know their facts. Can they apply them? There's a winning move on the board — two, actually.",
+      title: "Can they apply what they know?",
+      lead:  "There's a winning move on the board — two, actually. Help them find it.",
       hint:  '<strong>{NAME} can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.'
     },
     4: {
-      title: "Prevent them from winning by blocking them.",
-      lead:  "Player 2 is about to win. Facts alone won't help — they need to be used strategically.",
-      hint:  'What are the factors of <strong>28</strong>? Do we already have one on a pad?'
+      title: "Can they think defensively?",
+      lead:  "Player 2 is one move from winning. Facts alone won't save them — they need strategy.",
+      hint:  'What are the factors of <strong>28</strong>? Is one already on a pad?'
     },
     5: {
-      title: "Using strategic reasoning to plan ahead.",
-      lead:  "Which factors are safe to leave?",
-      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely? (18 = 2×9 = 3×6)'
+      title: "Can they plan two moves ahead?",
+      lead:  "Player 2 only needs the right factor pad to appear. Which cells are safe to leave?",
+      hint:  'Player 2 needs <strong>18</strong>. What can {name} leave safely? (18 = 2×9 = 3×6)'
     }
   },
   counting: {
     3: {
-      title: "Counting strategies take too long.",
-      lead:  "This needs multiplicative reasoning.",
+      title: "Can they reason multiplicatively?",
+      lead:  "Counting strategies take too long. This needs a factor pair, not a count.",
       hint:  'Look for a factor relationship — not a counting path. They need to reach <strong>2</strong> or <strong>27</strong>.'
     },
     4: {
-      title: "Stop Player 2 from winning.",
-      lead:  "They need to anticipate and act.",
-      hint:  'What gets them to <strong>28</strong>?'
+      title: "Can they spot the factor fast?",
+      lead:  "Player 2 is about to win. Recall the factors of 28 — quickly.",
+      hint:  'What gets them to <strong>28</strong>? Which pad change does it?'
     },
     5: {
-      title: "Think one move ahead.",
-      lead:  "Which factors are safe to leave?",
-      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely?'
+      title: "Can they hold the facts in mind?",
+      lead:  "Which factors are safe to leave on the pads?",
+      hint:  'Player 2 needs <strong>18</strong>. What can {name} leave safely?'
     }
   },
   freeze: {
     3: {
-      title: "Same game, two possible winning pairs of factors.",
-      lead:  "Can your student find flexibility?",
-      hint:  'They need <strong>2</strong> or <strong>27</strong> — two different winning paths.'
+      title: "Can they find a different path?",
+      lead:  "Same game, two possible winning pairs. Can they stay flexible?",
+      hint:  'They need <strong>2</strong> or <strong>27</strong> — two different winning routes.'
     },
     4: {
-      title: "A new scenario. Can they adapt?",
-      lead:  "The board has shifted. They need to adjust their thinking.",
+      title: "Can they adjust to a new arrangement?",
+      lead:  "The board has shifted. They have to think afresh.",
       hint:  'What gets them to <strong>28</strong>?'
     },
     5: {
-      title: "Each turn, your opponent changes the pads.",
-      lead:  "What keeps your student ahead?",
-      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely?'
+      title: "Can they hold two threats in mind?",
+      lead:  "Player 2 has multiple ways to win. Which one matters most?",
+      hint:  'Player 2 needs <strong>18</strong>. What can {name} leave safely?'
     }
   },
   speed: {
     3: {
-      title: "Speed won't find this — decision making will.",
-      lead:  "Which move wins?",
-      hint:  'They need to reach <strong>2</strong> or <strong>27</strong>. Which pad change gets them there?'
+      title: "Can they slow down to think?",
+      lead:  "Speed won't find this. Decision-making will.",
+      hint:  'They need to reach <strong>2</strong> or <strong>27</strong>. Which pad change actually gets them there?'
     },
     4: {
-      title: "Rushing leads to mistakes.",
-      lead:  "What's the deliberate move?",
+      title: "Can they spot the deliberate move?",
+      lead:  "Rushing leads to a missed block. What's the right factor?",
       hint:  'What gets them to <strong>28</strong>?'
     },
     5: {
-      title: "Fluency in slow motion.",
-      lead:  "Which factors are safe to leave?",
-      hint:  'Player 2 needs <strong>18</strong>. What can your student leave safely?'
+      title: "Can they reason about what to leave?",
+      lead:  "Fluency in slow motion. Which factors are safe?",
+      hint:  'Player 2 needs <strong>18</strong>. What can {name} leave safely?'
     }
   }
 };
@@ -1908,14 +1924,14 @@ function renderEcho() {
   const q = PROBLEM_LABELS[state.problem] || "Students freeze when numbers change";
   document.getElementById('echoQuote').textContent = `"${q}"`;
   const themeCopy = {
-    apply:    { h: "This is how they build applied fluency.", b: "Your student didn't just know the facts — they used them to win, to block, and to anticipate. Applied, strategic, flexible thinking." },
-    counting: { h: "This is how they move beyond counting.", b: "Each decision rewarded multiplicative reasoning — not counting strategies. Fluency built in context." },
-    freeze:   { h: "This is how they learn to adapt.", b: "Three scenarios, three different demands. Your student shifted their thinking each time. That's flexible fluency." },
-    speed:    { h: "Fluency isn't speed. It's strategic thinking.", b: "Your student reasoned about facts, factors, and relationships. Not rushed — chosen. That's deep understanding." }
+    apply:    { h: "This is how they build applied fluency.", b: "{NAME} didn't just know the facts — they used them to win, to block, and to anticipate. Applied, strategic, flexible thinking." },
+    counting: { h: "This is how they move beyond counting.", b: "Each decision rewarded multiplicative reasoning — not counting. Fluency built in context, not on a worksheet." },
+    freeze:   { h: "This is how they learn to adapt.", b: "Three scenarios, three different demands. {NAME} shifted their thinking each time. That's flexible fluency." },
+    speed:    { h: "Fluency isn't speed. It's strategic thinking.", b: "{NAME} reasoned about facts, factors, and relationships. Not rushed — chosen. That's deep understanding." }
   };
   const copy = themeCopy[state.problem] || themeCopy.apply;
-  document.getElementById('closeHeadline').textContent = copy.h;
-  document.getElementById('closeLead').textContent = copy.b;
+  document.getElementById('closeHeadline').textContent = fillName(copy.h);
+  document.getElementById('closeLead').textContent = fillName(copy.b);
 }
 
 /* ===========================================================

@@ -305,7 +305,6 @@
     user-select: none;
     font-size: 10px;
   }
-  .hex-text.claimed { font-weight: 500; }
   .hex.current {
     stroke: var(--honey-deep) !important;
     stroke-width: 1.8px !important;
@@ -1371,16 +1370,10 @@ function drawBoard(svgId, scenarioIdx) {
 
       if (sc.p1Claimed.includes(p)) {
         fill = 'var(--amber)';
-        stroke = 'var(--amber)';
-        strokeW = 1;
         textFill = '#FFFFFF';
-        textCls += ' claimed';
       } else if (sc.p2Claimed.includes(p)) {
         fill = 'var(--red)';
-        stroke = 'var(--red)';
-        strokeW = 1;
         textFill = '#FFFFFF';
-        textCls += ' claimed';
       }
 
       if (p === currentProduct) {
@@ -1419,16 +1412,10 @@ function paintCell(svgId, product, claim, highlight = false) {
   if (!poly) return;
   if (claim === 'p1') {
     poly.setAttribute('fill', 'var(--amber)');
-    poly.setAttribute('stroke', 'var(--amber)');
-    poly.setAttribute('stroke-width', '1');
     text.setAttribute('fill', '#FFFFFF');
-    text.classList.add('claimed');
   } else if (claim === 'p2') {
     poly.setAttribute('fill', 'var(--red)');
-    poly.setAttribute('stroke', 'var(--red)');
-    poly.setAttribute('stroke-width', '1');
     text.setAttribute('fill', '#FFFFFF');
-    text.classList.add('claimed');
   }
   if (highlight) {
     poly.classList.add('winline');

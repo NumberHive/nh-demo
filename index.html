@@ -225,7 +225,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 4px;
   }
   .player-chip {
     display: flex;
@@ -267,27 +267,28 @@
     flex-direction: column;
     align-items: center;
     margin: 0;
-    flex: 0 1 420px;
+    flex: 0 1 540px;
+    width: 100%;
   }
   .board-row {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
-    margin: 4px 0 10px;
+    gap: 8px;
+    margin: 0 0 6px;
   }
   .board-row .board-wrap { flex: 0 1 auto; }
   .board-row .scenario-prompt {
     margin: 0;
     width: 100%;
-    max-width: 520px;
+    max-width: 540px;
   }
   .board-svg {
     display: block;
     max-width: 100%;
     height: auto;
     width: 100%;
-    max-width: 420px;
+    max-width: 540px;
   }
 
   /* Hex styles */
@@ -304,6 +305,7 @@
     user-select: none;
     font-size: 10px;
   }
+  .hex-text.claimed { font-weight: 500; }
   .hex.current {
     stroke: var(--honey-deep) !important;
     stroke-width: 1.8px !important;
@@ -1365,17 +1367,20 @@ function drawBoard(svgId, scenarioIdx) {
       let strokeW = 1;
       let textFill = 'var(--ink-soft)';
       let cls = 'hex';
+      let textCls = 'hex-text';
 
       if (sc.p1Claimed.includes(p)) {
         fill = 'var(--amber)';
-        stroke = 'var(--amber-deep)';
-        strokeW = 1.5;
+        stroke = 'var(--amber)';
+        strokeW = 1;
         textFill = '#FFFFFF';
+        textCls += ' claimed';
       } else if (sc.p2Claimed.includes(p)) {
         fill = 'var(--red)';
-        stroke = 'var(--red-deep)';
-        strokeW = 1.5;
+        stroke = 'var(--red)';
+        strokeW = 1;
         textFill = '#FFFFFF';
+        textCls += ' claimed';
       }
 
       if (p === currentProduct) {
@@ -1397,7 +1402,7 @@ function drawBoard(svgId, scenarioIdx) {
       text.setAttribute('x', cx);
       text.setAttribute('y', cy + 3.5);
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('class', 'hex-text');
+      text.setAttribute('class', textCls);
       text.setAttribute('fill', textFill);
       text.dataset.product = p;
       text.textContent = p;
@@ -1414,14 +1419,16 @@ function paintCell(svgId, product, claim, highlight = false) {
   if (!poly) return;
   if (claim === 'p1') {
     poly.setAttribute('fill', 'var(--amber)');
-    poly.setAttribute('stroke', 'var(--amber-deep)');
-    poly.setAttribute('stroke-width', '1.5');
+    poly.setAttribute('stroke', 'var(--amber)');
+    poly.setAttribute('stroke-width', '1');
     text.setAttribute('fill', '#FFFFFF');
+    text.classList.add('claimed');
   } else if (claim === 'p2') {
     poly.setAttribute('fill', 'var(--red)');
-    poly.setAttribute('stroke', 'var(--red-deep)');
-    poly.setAttribute('stroke-width', '1.5');
+    poly.setAttribute('stroke', 'var(--red)');
+    poly.setAttribute('stroke-width', '1');
     text.setAttribute('fill', '#FFFFFF');
+    text.classList.add('claimed');
   }
   if (highlight) {
     poly.classList.add('winline');

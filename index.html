@@ -867,13 +867,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 64px;
-    margin-bottom: 18px;
+    height: 150px;
+    margin: 4px 0 20px;
   }
   .leader-card .graphic svg {
     height: 100%;
-    width: auto;
-    max-width: 100%;
+    width: 100%;
     display: block;
   }
   .leader-stat {
@@ -884,6 +883,44 @@
     line-height: 1.55;
   }
   .leader-stat strong { color: var(--ink); font-weight: 600; }
+
+  /* Built for impact strip */
+  .leader-strip {
+    margin-top: 28px;
+    padding: 22px 26px;
+    background: var(--cream);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .leader-strip-title {
+    font-family: 'Fraunces', Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .leader-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 720px) {
+    .leader-stats { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  }
+  .leader-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+  .leader-stat-item svg {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+  }
 
   /* Thank you */
   .thanks { text-align: center; padding: 60px 20px; }
@@ -1207,12 +1244,37 @@
         <div class="leader-card">
           <div class="ico">1</div>
           <div class="graphic">
-            <svg viewBox="0 0 100 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <line x1="22" y1="22" x2="50" y2="22" stroke="#C78508" stroke-width="1.6" stroke-linecap="round"/>
-              <line x1="50" y1="22" x2="78" y2="22" stroke="#C78508" stroke-width="1.6" stroke-linecap="round"/>
-              <polygon points="22,14 28.93,18 28.93,26 22,30 15.07,26 15.07,18" fill="#FFF1D0" stroke="#C78508" stroke-width="1.5"/>
-              <polygon points="50,14 56.93,18 56.93,26 50,30 43.07,26 43.07,18" fill="#F5B825" stroke="#C78508" stroke-width="1.5"/>
-              <polygon points="78,14 84.93,18 84.93,26 78,30 71.07,26 71.07,18" fill="#FFF1D0" stroke="#C78508" stroke-width="1.5"/>
+            <svg viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Dashed connector spokes from centre to each outer hex -->
+              <g stroke="#D68D1E" stroke-width="1.4" stroke-dasharray="3 3" stroke-linecap="round" fill="none">
+                <line x1="90" y1="70" x2="90" y2="40"/>
+                <line x1="90" y1="70" x2="116" y2="55"/>
+                <line x1="90" y1="70" x2="116" y2="85"/>
+                <line x1="90" y1="70" x2="90" y2="100"/>
+                <line x1="90" y1="70" x2="64" y2="85"/>
+                <line x1="90" y1="70" x2="64" y2="55"/>
+              </g>
+              <!-- Outer cream hexes (flat-top) -->
+              <g fill="#FFF5DC" stroke="#D68D1E" stroke-width="1.5">
+                <polygon points="80,40 85,31.34 95,31.34 100,40 95,48.66 85,48.66"/>
+                <polygon points="106,55 111,46.34 121,46.34 126,55 121,63.66 111,63.66"/>
+                <polygon points="106,85 111,76.34 121,76.34 126,85 121,93.66 111,93.66"/>
+                <polygon points="80,100 85,91.34 95,91.34 100,100 95,108.66 85,108.66"/>
+                <polygon points="54,85 59,76.34 69,76.34 74,85 69,93.66 59,93.66"/>
+                <polygon points="54,55 59,46.34 69,46.34 74,55 69,63.66 59,63.66"/>
+              </g>
+              <!-- Centre amber hex -->
+              <polygon points="76,70 83,57.88 97,57.88 104,70 97,82.12 83,82.12" fill="#F5B825" stroke="#D68D1E" stroke-width="1.5"/>
+              <!-- Numbers -->
+              <g font-family="'DM Sans', sans-serif" text-anchor="middle">
+                <text x="90" y="74" font-size="12" font-weight="700" fill="#1E1A15">24</text>
+                <text x="90" y="43" font-size="9" font-weight="600" fill="#4A4239">12</text>
+                <text x="116" y="58" font-size="9" font-weight="600" fill="#4A4239">18</text>
+                <text x="116" y="88" font-size="9" font-weight="600" fill="#4A4239">30</text>
+                <text x="90" y="103" font-size="9" font-weight="600" fill="#4A4239">48</text>
+                <text x="64" y="88" font-size="9" font-weight="600" fill="#4A4239">36</text>
+                <text x="64" y="58" font-size="9" font-weight="600" fill="#4A4239">8</text>
+              </g>
             </svg>
           </div>
           <h3>Strong number foundations</h3>
@@ -1222,23 +1284,38 @@
         <div class="leader-card">
           <div class="ico">2</div>
           <div class="graphic">
-            <svg viewBox="0 0 100 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <g>
-                <rect x="20" y="6" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="33" y="6" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="46" y="6" width="11" height="8" rx="1.5" fill="#F5B825"/>
-                <rect x="59" y="6" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="72" y="6" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="20" y="16" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="33" y="16" width="11" height="8" rx="1.5" fill="#F5B825"/>
-                <rect x="46" y="16" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="59" y="16" width="11" height="8" rx="1.5" fill="#BC3A27"/>
-                <rect x="72" y="16" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="20" y="26" width="11" height="8" rx="1.5" fill="#F5B825"/>
-                <rect x="33" y="26" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="46" y="26" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="59" y="26" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
-                <rect x="72" y="26" width="11" height="8" rx="1.5" fill="#5A9E3A"/>
+            <svg viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Card frame -->
+              <rect x="20" y="14" width="140" height="106" rx="8" fill="#FAF6EC" stroke="#E4DCC7" stroke-width="1"/>
+              <text x="32" y="32" font-family="'DM Sans', sans-serif" font-size="9" font-weight="700" fill="#4A4239">Facts 1–12</text>
+              <!-- 4×3 grid of fact cells -->
+              <g stroke="#FFFFFF" stroke-width="1.5">
+                <rect x="32" y="42" width="22" height="20" rx="3" fill="#5A9E3A"/>
+                <rect x="58" y="42" width="22" height="20" rx="3" fill="#5A9E3A"/>
+                <rect x="84" y="42" width="22" height="20" rx="3" fill="#5A9E3A"/>
+                <rect x="110" y="42" width="22" height="20" rx="3" fill="#F5B825"/>
+                <rect x="32" y="66" width="22" height="20" rx="3" fill="#5A9E3A"/>
+                <rect x="58" y="66" width="22" height="20" rx="3" fill="#5A9E3A"/>
+                <rect x="84" y="66" width="22" height="20" rx="3" fill="#F5B825"/>
+                <rect x="110" y="66" width="22" height="20" rx="3" fill="#BC3A27"/>
+                <rect x="32" y="90" width="22" height="20" rx="3" fill="#5A9E3A"/>
+                <rect x="58" y="90" width="22" height="20" rx="3" fill="#F5B825"/>
+                <rect x="84" y="90" width="22" height="20" rx="3" fill="#BC3A27"/>
+                <rect x="110" y="90" width="22" height="20" rx="3" fill="#5A9E3A"/>
+              </g>
+              <!-- Numbers -->
+              <g font-family="'DM Sans', sans-serif" font-weight="700" text-anchor="middle" fill="#FFFFFF" font-size="10">
+                <text x="43" y="56">1</text><text x="69" y="56">2</text><text x="95" y="56">3</text><text x="121" y="56">4</text>
+                <text x="43" y="80">5</text><text x="69" y="80">6</text><text x="95" y="80">7</text><text x="121" y="80">8</text>
+                <text x="43" y="104">9</text><text x="69" y="104">10</text><text x="95" y="104">11</text><text x="121" y="104">12</text>
+              </g>
+              <!-- Magnifier with person silhouette overlay -->
+              <g transform="translate(118, 96)">
+                <line x1="9" y1="9" x2="20" y2="20" stroke="#1E1A15" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="9" y1="9" x2="20" y2="20" stroke="#F5B825" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="0" cy="0" r="13" fill="#FFFFFF" stroke="#1E1A15" stroke-width="2"/>
+                <circle cx="0" cy="-3.5" r="3" fill="#1E1A15"/>
+                <path d="M -5.5 6 Q -5.5 -0.5 0 -0.5 Q 5.5 -0.5 5.5 6 Z" fill="#1E1A15"/>
               </g>
             </svg>
           </div>
@@ -1249,21 +1326,96 @@
         <div class="leader-card">
           <div class="ico">3</div>
           <div class="graphic">
-            <svg viewBox="0 0 100 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <line x1="29" y1="22" x2="50" y2="22" stroke="#C78508" stroke-width="1.5" stroke-dasharray="2 2" stroke-linecap="round"/>
-              <line x1="50" y1="22" x2="71" y2="22" stroke="#C78508" stroke-width="1.5" stroke-dasharray="2 2" stroke-linecap="round"/>
-              <circle cx="20" cy="22" r="8" fill="#FFF1D0" stroke="#C78508" stroke-width="1.5"/>
-              <rect x="16.5" y="18.5" width="7" height="7" fill="none" stroke="#C78508" stroke-width="1.2" rx="1"/>
-              <circle cx="50" cy="22" r="8" fill="#F5B825" stroke="#C78508" stroke-width="1.5"/>
-              <polygon points="47,18 47,26 53.2,22" fill="#1E1A15"/>
-              <circle cx="80" cy="22" r="8" fill="#FFF1D0" stroke="#C78508" stroke-width="1.5"/>
-              <rect x="76" y="22" width="2" height="3" fill="#C78508"/>
-              <rect x="79" y="19" width="2" height="6" fill="#C78508"/>
-              <rect x="82" y="17" width="2" height="8" fill="#C78508"/>
+            <svg viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Dashed arrows from corner avatars to central hive -->
+              <defs>
+                <marker id="leaderArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <polygon points="0,1 10,5 0,9" fill="#D68D1E"/>
+                </marker>
+              </defs>
+              <g stroke="#D68D1E" stroke-width="1.4" stroke-dasharray="3 3" stroke-linecap="round" fill="none">
+                <line x1="42" y1="38" x2="76" y2="60" marker-end="url(#leaderArr)"/>
+                <line x1="138" y1="38" x2="104" y2="60" marker-end="url(#leaderArr)"/>
+                <line x1="42" y1="102" x2="76" y2="80" marker-end="url(#leaderArr)"/>
+                <line x1="138" y1="102" x2="104" y2="80" marker-end="url(#leaderArr)"/>
+              </g>
+              <!-- Central honeycomb cluster (flat-top, 7 amber hexes) -->
+              <g fill="#F5B825" stroke="#D68D1E" stroke-width="1.2">
+                <polygon points="83,70 86.5,63.94 93.5,63.94 97,70 93.5,76.06 86.5,76.06"/>
+                <polygon points="83,57.88 86.5,51.82 93.5,51.82 97,57.88 93.5,63.94 86.5,63.94"/>
+                <polygon points="93.5,63.94 97,57.88 104,57.88 107.5,63.94 104,70 97,70"/>
+                <polygon points="93.5,76.06 97,70 104,70 107.5,76.06 104,82.12 97,82.12"/>
+                <polygon points="83,82.12 86.5,76.06 93.5,76.06 97,82.12 93.5,88.18 86.5,88.18"/>
+                <polygon points="72.5,76.06 76,70 83,70 86.5,76.06 83,82.12 76,82.12"/>
+                <polygon points="72.5,63.94 76,57.88 83,57.88 86.5,63.94 83,70 76,70"/>
+              </g>
+              <!-- Brand mark in centre -->
+              <polygon points="88,70 90,67 93,67 95,70 93,73 90,73" fill="#1E1A15"/>
+              <!-- Avatars -->
+              <g>
+                <!-- TL -->
+                <circle cx="32" cy="32" r="14" fill="#FFFFFF" stroke="#D68D1E" stroke-width="1.6"/>
+                <circle cx="32" cy="29" r="4.5" fill="#C8A37A"/>
+                <path d="M 24 42 Q 24 35 32 35 Q 40 35 40 42 Z" fill="#E08740"/>
+                <!-- TR -->
+                <circle cx="148" cy="32" r="14" fill="#FFFFFF" stroke="#D68D1E" stroke-width="1.6"/>
+                <circle cx="148" cy="29" r="4.5" fill="#A88860"/>
+                <path d="M 140 42 Q 140 35 148 35 Q 156 35 156 42 Z" fill="#5A9E3A"/>
+                <!-- BL -->
+                <circle cx="32" cy="108" r="14" fill="#FFFFFF" stroke="#D68D1E" stroke-width="1.6"/>
+                <circle cx="32" cy="105" r="4.5" fill="#D4B88E"/>
+                <path d="M 24 118 Q 24 111 32 111 Q 40 111 40 118 Z" fill="#3B82F6"/>
+                <!-- BR -->
+                <circle cx="148" cy="108" r="14" fill="#FFFFFF" stroke="#D68D1E" stroke-width="1.6"/>
+                <circle cx="148" cy="105" r="4.5" fill="#B89274"/>
+                <path d="M 140 118 Q 140 111 148 111 Q 156 111 156 118 Z" fill="#9B59B6"/>
+              </g>
             </svg>
           </div>
           <h3>Whole-school access. Low implementation lift.</h3>
           <p>Set up in under 10 minutes. Works alongside your current program. No extra lessons, no added assessment load.</p>
+        </div>
+      </div>
+
+      <div class="leader-strip">
+        <p class="leader-strip-title">Built for impact. Designed for schools.</p>
+        <div class="leader-stats">
+          <div class="leader-stat-item">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="14" cy="14" r="11" fill="none" stroke="#F5B825" stroke-width="2"/>
+              <line x1="14" y1="14" x2="14" y2="7" stroke="#F5B825" stroke-width="2" stroke-linecap="round"/>
+              <line x1="14" y1="14" x2="19" y2="14" stroke="#F5B825" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Under 10 minutes<br>to set up</span>
+          </div>
+          <div class="leader-stat-item">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="14" cy="9" r="3" fill="none" stroke="#5A9E3A" stroke-width="2"/>
+              <path d="M 8 21 Q 8 15 14 15 Q 20 15 20 21" fill="none" stroke="#5A9E3A" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="6" cy="11" r="2.5" fill="none" stroke="#5A9E3A" stroke-width="1.5"/>
+              <path d="M 1.5 21 Q 1.5 16 6 16" fill="none" stroke="#5A9E3A" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="22" cy="11" r="2.5" fill="none" stroke="#5A9E3A" stroke-width="1.5"/>
+              <path d="M 26.5 21 Q 26.5 16 22 16" fill="none" stroke="#5A9E3A" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>Students engaged<br>from day one</span>
+          </div>
+          <div class="leader-stat-item">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="4" y="18" width="5" height="6" rx="1" fill="#3B82F6"/>
+              <rect x="11.5" y="13" width="5" height="11" rx="1" fill="#3B82F6"/>
+              <rect x="19" y="8" width="5" height="16" rx="1" fill="#3B82F6"/>
+              <polyline points="4,12 14,7 24,4" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polygon points="20,3 25,3 25,8" fill="#3B82F6"/>
+            </svg>
+            <span>Evidence of thinking<br>as it happens</span>
+          </div>
+          <div class="leader-stat-item">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M 14 3 L 24 6 L 24 14 Q 24 21 14 25 Q 4 21 4 14 L 4 6 Z" fill="none" stroke="#9B59B6" stroke-width="2" stroke-linejoin="round"/>
+              <polyline points="9,14 13,18 19,11" fill="none" stroke="#9B59B6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>No extra testing.<br>No extra workload.</span>
+          </div>
         </div>
       </div>
 

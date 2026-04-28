@@ -505,6 +505,37 @@
     color: var(--ink);
   }
 
+  /* Win celebration banner — overlays the game frame on student win */
+  .win-banner {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 253, 247, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: var(--radius);
+    z-index: 25;
+  }
+  .win-banner.show { display: flex; }
+  .win-banner span {
+    font-family: 'Fraunces', Georgia, "Times New Roman", serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--honey);
+    padding: 16px 36px;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(214, 141, 30, 0.35);
+    animation: winBannerPop 0.5s ease both;
+  }
+  @keyframes winBannerPop {
+    0% { opacity: 0; transform: scale(0.7); }
+    70% { transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
   /* Caption overlay (feedback after move — pops up over the board) */
   .caption {
     position: absolute;
@@ -1057,11 +1088,12 @@
           </div>
           <div class="scenario-prompt" id="s3hint">
             <div class="icon">?</div>
-            <div><strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.</div>
+            <div><strong>Your student can change only one number pad.</strong> Which factor should they change? They need a product of <strong>27</strong>.</div>
           </div>
         </div>
         <div class="numpads" id="pads1"></div>
         <div class="caption" id="caption1"></div>
+        <div class="win-banner" id="winBanner1"><span>Won!</span></div>
       </div>
     </section>
 
@@ -1089,6 +1121,7 @@
         </div>
         <div class="numpads" id="pads2"></div>
         <div class="caption" id="caption2"></div>
+        <div class="win-banner" id="winBanner2"><span>Won!</span></div>
       </div>
     </section>
 
@@ -1525,53 +1558,23 @@ ROWS.forEach((r, row) => {
 const SCENARIOS = {
   1: {
     // Help student win. Student has 88, 63, 9 in a diagonal.
-    // Winning claims: 2 (completes 88-63-9-2) OR 27 (completes 27-88-63-9).
-    // Current pads: 2 × 9 = 18 (Player 2 just played).
-    p1Claimed: [88, 63, 9],
-    p2Claimed: [18, 80, 100],
+    // Cell 2 is now P2-claimed → only winning move is 27 (via pad1:3).
+    p1Claimed: [88, 63, 9, 70],
+    p2Claimed: [18, 80, 100, 2],
     pads: { pad1: 2, pad2: 9 },
-    // Clickable pad cells and their outcomes.
-    // padMoves key format: "pad1:NEW" or "pad2:NEW"
-    padMoves: {
-      "pad1:3": { // 3 × 9 = 27, WIN
-        result: 27, outcome: "win",
-        winLine: [27, 88, 63, 9],
-        claim: 'p1'
-      },
-      "pad2:1": { // 2 × 1 = 2, WIN
-        result: 2, outcome: "win",
-        winLine: [88, 63, 9, 2],
-        claim: 'p1'
-      },
-      "pad1:4": { // 4 × 9 = 36 — distractor
-        result: 36, outcome: "miss",
-        claim: 'p1'
-      }
-    }
+    openPads: true,
+    winTarget: 27,
+    winLine: [27, 88, 63, 9]
   },
   2: {
-    // Block opponent. P2 has 49, 63, 12 diagonally (SW line from top-right).
-    // They win with 28 (row 2, col 6, NE end). Student must claim 28.
-    // Current pads: 7 × 6 = 42 (P2 just played 42).
-    // Block: change pad2 6→4 to get 7×4 = 28. A harder multiplication fact.
-    p1Claimed: [35, 44, 110],
-    p2Claimed: [49, 63, 12],
+    // Block P2. P2 threat line: [28, 49, 63, 12] — they win at 28.
+    // Block = pad2:4 → 7×4=28. Anything else = bot wins (if 7 still on a pad).
+    p1Claimed: [35, 44, 110, 132],
+    p2Claimed: [49, 63, 12, 33],
     pads: { pad1: 7, pad2: 6 },
-    padMoves: {
-      "pad2:4": { // 7 × 4 = 28, BLOCK
-        result: 28, outcome: "block",
-        winLine: [28, 49, 63, 12],
-        claim: 'p1'
-      },
-      "pad1:5": { // 5 × 6 = 30 — distractor, doesn't block
-        result: 30, outcome: "miss-block",
-        claim: 'p1'
-      },
-      "pad2:8": { // 7 × 8 = 56 — distractor
-        result: 56, outcome: "miss-block",
-        claim: 'p1'
-      }
-    }
+    openPads: true,
+    blockTarget: 28,
+    winLine: [28, 49, 63, 12]
   },
   3: {
     // Anticipation. Player 2 threatens with row 5: 42, 55, 144.
@@ -1609,9 +1612,9 @@ const SCENARIOS = {
 const MESSAGES = {
   1: {
     win: {
-      apply:    { h: "✓ Exactly right.",      b: "{NAME} spotted that 1×2=2 (or 3×9=27) reached a winning cell. That's fact application — not just recall." },
+      apply:    { h: "✓ Exactly right.",      b: "{NAME} spotted that 3×9=27 completed the line. That's fact application — not just recall." },
       counting: { h: "✓ Multiplicative thinking.", b: "{NAME} reached the winning cell with a single factor change. No counting — factors." },
-      freeze:   { h: "✓ Flexible.",            b: "Two winning paths sat on the board. {NAME} stayed open and found one. That's flexible fluency." },
+      freeze:   { h: "✓ Flexible thinking.",  b: "{NAME} found the path on a board they hadn't seen before. That's flexible fluency at work." },
       speed:    { h: "✓ Chosen, not rushed.",  b: "{NAME} reasoned about which factor change actually wins — not the first thing that came to mind." }
     },
     winAlt: {
@@ -1807,18 +1810,194 @@ function renderPads(containerId, scenarioIdx) {
       cell.dataset.pad = padKey;
       const selected = sc.pads[padKey];
       if (n === selected) cell.classList.add('selected');
-      // Check if this is a featured move
-      const moveKey = `${padKey}:${n}`;
-      if (sc.padMoves[moveKey]) {
-        cell.classList.add('clickable');
-        cell.addEventListener('click', () => handleMove(scenarioIdx, moveKey));
-      } else if (n !== selected) {
-        cell.classList.add('dim');
+
+      if (sc.openPads) {
+        // Every non-selected cell is clickable (dynamic outcome).
+        // Cells whose product is already claimed will silently no-op on click.
+        if (n !== selected) {
+          cell.classList.add('clickable');
+          cell.addEventListener('click', () => handleOpenPadClick(scenarioIdx, padKey, n));
+        }
+      } else if (sc.padMoves) {
+        // Legacy scripted-move scenario (s3): only featured moves are clickable.
+        const moveKey = `${padKey}:${n}`;
+        if (sc.padMoves[moveKey]) {
+          cell.classList.add('clickable');
+          cell.addEventListener('click', () => handleMove(scenarioIdx, moveKey));
+        } else if (n !== selected) {
+          cell.classList.add('dim');
+        }
       }
       pad.appendChild(cell);
     }
     container.appendChild(pad);
   });
+}
+
+/* Open-pads handler: dynamic outcome based on resulting product. */
+function handleOpenPadClick(scenarioIdx, padKey, newVal) {
+  if (state.moves[scenarioIdx]) return;
+  const sc = SCENARIOS[scenarioIdx];
+  if (sc.pads[padKey] === newVal) return; // no-op same value
+  const newProduct = (padKey === 'pad1' ? newVal : sc.pads.pad1) *
+                     (padKey === 'pad2' ? newVal : sc.pads.pad2);
+  // Cell must exist on the board
+  if (!BOARD_INDEX[newProduct]) return;
+  // Cell must not already be claimed
+  if (sc.p1Claimed.includes(newProduct) || sc.p2Claimed.includes(newProduct)) return;
+
+  state.moves[scenarioIdx] = `${padKey}:${newVal}`;
+
+  // Apply pad change
+  const oldPads = { ...sc.pads };
+  sc.pads[padKey] = newVal;
+  const oldProduct = oldPads.pad1 * oldPads.pad2;
+
+  // Visual: lock the pads
+  lockPads(scenarioIdx, padKey, newVal);
+
+  // Animate current marker moving
+  flashCurrent(`board${scenarioIdx}`, oldProduct, newProduct);
+
+  // Determine outcome
+  let outcome, winLine = null;
+  if (scenarioIdx === 1) {
+    if (newProduct === sc.winTarget) { outcome = 'win'; winLine = sc.winLine; }
+    else outcome = 'miss';
+  } else if (scenarioIdx === 2) {
+    if (newProduct === sc.blockTarget) { outcome = 'block'; winLine = sc.winLine; }
+    else outcome = 'wrong-block';
+  }
+
+  // Claim student's cell after the flash
+  setTimeout(() => {
+    sc.p1Claimed.push(newProduct);
+    paintCell(`board${scenarioIdx}`, newProduct, 'p1', false);
+
+    if (outcome === 'win') {
+      winLine.forEach(p => paintCell(`board${scenarioIdx}`, p, 'p1', true));
+      showWinBanner(scenarioIdx);
+      setTimeout(() => {
+        hideWinBanner(scenarioIdx);
+        showCaption(scenarioIdx, { outcome: 'win', winLine, claim: 'p1' });
+      }, 1800);
+    } else if (outcome === 'block') {
+      winLine.forEach(p => highlightCell(`board${scenarioIdx}`, p));
+      setTimeout(() => {
+        showCaption(scenarioIdx, { outcome: 'block', winLine, claim: 'p1' });
+      }, 700);
+    } else if (outcome === 'miss') {
+      // Scenario 1 wrong move
+      setTimeout(() => {
+        showCaption(scenarioIdx, {
+          outcome: 'miss',
+          retryable: true,
+          customMessage: {
+            h: "Not the win.",
+            b: `${nameOrThey()} didn't get the four in a row. They needed to make the product <strong>27</strong>. Try again.`
+          }
+        });
+      }, 800);
+    } else if (outcome === 'wrong-block') {
+      // Scenario 2 wrong move — bot may now win
+      handleS2BotResponse(scenarioIdx, sc, padKey, newVal, newProduct);
+    }
+  }, 350);
+}
+
+function handleS2BotResponse(scenarioIdx, sc, studentPad, studentVal, studentProduct) {
+  const sevenStillOnPad = (sc.pads.pad1 === 7 || sc.pads.pad2 === 7);
+  if (sevenStillOnPad) {
+    // Bot changes the OTHER pad to 4 to make 7×4=28
+    const botPad = (sc.pads.pad1 === 7) ? 'pad2' : 'pad1';
+    setTimeout(() => animateBotPad(scenarioIdx, botPad, 4), 600);
+    setTimeout(() => {
+      const oldP = sc.pads.pad1 * sc.pads.pad2;
+      sc.pads[botPad] = 4;
+      const newP = sc.pads.pad1 * sc.pads.pad2; // 28
+      flashCurrent(`board${scenarioIdx}`, oldP, newP);
+    }, 1100);
+    setTimeout(() => {
+      sc.p2Claimed.push(28);
+      paintCell(`board${scenarioIdx}`, 28, 'p2', true);
+      sc.winLine.forEach(p => paintCell(`board${scenarioIdx}`, p, 'p2', true));
+    }, 1450);
+    setTimeout(() => {
+      showCaption(scenarioIdx, {
+        outcome: 'wrong-block',
+        retryable: true,
+        customMessage: {
+          h: `Player 2 won.`,
+          b: `${nameOrThey()} didn't block. Player 2 played 7 × 4 = <strong>28</strong> and completed four in a row. Try again — the only block was making <strong>28</strong>.`
+        }
+      });
+    }, 2100);
+  } else {
+    // 7 was moved off both pads — bot can't make 28 in one move
+    setTimeout(() => {
+      showCaption(scenarioIdx, {
+        outcome: 'wrong-block',
+        retryable: true,
+        customMessage: {
+          h: "Not the block.",
+          b: `${nameOrThey()} moved the 7 off the pads, so Player 2 can't reach 28 immediately — but the right move was to claim <strong>28</strong> directly. Try again.`
+        }
+      });
+    }, 800);
+  }
+}
+
+function animateBotPad(scenarioIdx, padKey, newVal) {
+  const padContainer = document.getElementById(`pads${scenarioIdx}-${padKey}`);
+  if (!padContainer) return;
+  padContainer.querySelectorAll('.pad-cell').forEach(c => {
+    c.classList.remove('selected');
+    c.style.background = '';
+    c.style.color = '';
+    c.style.borderColor = '';
+    c.style.opacity = '';
+    if (parseInt(c.dataset.value, 10) === newVal) {
+      c.classList.remove('dim');
+      c.classList.add('selected');
+      c.style.background = 'var(--red)';
+      c.style.color = '#fff';
+      c.style.borderColor = 'var(--red-deep)';
+      c.style.opacity = '1';
+    } else {
+      c.classList.add('dim');
+    }
+  });
+}
+
+function lockPads(scenarioIdx, padKey, newVal) {
+  const padContainer = document.getElementById(`pads${scenarioIdx}-${padKey}`);
+  if (padContainer) {
+    padContainer.querySelectorAll('.pad-cell').forEach(c => {
+      c.classList.remove('selected', 'clickable');
+      if (parseInt(c.dataset.value, 10) === newVal) c.classList.add('selected');
+      else c.classList.add('dim');
+    });
+  }
+  const otherPad = padKey === 'pad1' ? 'pad2' : 'pad1';
+  const otherContainer = document.getElementById(`pads${scenarioIdx}-${otherPad}`);
+  if (otherContainer) {
+    otherContainer.querySelectorAll('.pad-cell').forEach(c => {
+      c.classList.remove('clickable');
+      if (!c.classList.contains('selected')) c.classList.add('dim');
+    });
+  }
+}
+
+function showWinBanner(scenarioIdx) {
+  const banner = document.getElementById(`winBanner${scenarioIdx}`);
+  if (!banner) return;
+  const span = banner.querySelector('span');
+  if (span) span.textContent = (state.studentName || 'Your student') + ' won!';
+  banner.classList.add('show');
+}
+function hideWinBanner(scenarioIdx) {
+  const banner = document.getElementById(`winBanner${scenarioIdx}`);
+  if (banner) banner.classList.remove('show');
 }
 
 /* ===========================================================
@@ -1915,15 +2094,24 @@ function showCaption(scenarioIdx, move) {
   let outcomeKey = move.outcome;
   if (scenarioIdx === 1 && move.outcome === 'win') outcomeKey = 'win';
 
-  const msgs = MESSAGES[scenarioIdx];
-  const msg = (msgs[outcomeKey] && msgs[outcomeKey][theme]) || msgs[outcomeKey]?.apply || { h: "Nice move.", b: "" };
+  // Resolve message: caller-supplied custom message wins; else fall back to MESSAGES table.
+  const msgs = MESSAGES[scenarioIdx] || {};
+  let msg;
+  if (move.customMessage) {
+    msg = move.customMessage;
+  } else {
+    msg = (msgs[outcomeKey] && msgs[outcomeKey][theme]) || msgs[outcomeKey]?.apply || { h: "Nice move.", b: "" };
+  }
 
   let cls = 'info';
   if (outcomeKey === 'win' || outcomeKey === 'block' || outcomeKey === 'safe') cls = 'success';
-  if (outcomeKey === 'miss' || outcomeKey === 'miss-block' || outcomeKey === 'leak') cls = 'warn';
+  if (outcomeKey === 'miss' || outcomeKey === 'miss-block' || outcomeKey === 'leak' || outcomeKey === 'wrong-block') cls = 'warn';
 
   // Next screen index: scenarios 1,2,3 → 4,5,6
   const nextScreen = scenarioIdx + 3;
+  const buttonHtml = move.retryable
+    ? `<button class="btn primary btn-arrow" onclick="resetScenario(${scenarioIdx})">Try again</button>`
+    : `<button class="btn primary btn-arrow" onclick="goto(${nextScreen})">Continue</button>`;
 
   capEl.className = `caption ${cls}`;
   capEl.innerHTML = `
@@ -1931,7 +2119,7 @@ function showCaption(scenarioIdx, move) {
       <div class="headline">${fillName(msg.h)}</div>
       <div class="cap-body">${fillName(msg.b)}</div>
       <div class="cap-actions">
-        <button class="btn primary btn-arrow" onclick="goto(${nextScreen})">Continue</button>
+        ${buttonHtml}
       </div>
     </div>`;
   setTimeout(() => { capEl.classList.add('show'); }, 200);
@@ -1965,18 +2153,42 @@ function goto(n) {
   if (n === 8) renderEcho();
 }
 
+/* Pristine state for each scenario — used by Restart and Try-again */
+const SCENARIO_INITIAL = {
+  1: { p1Claimed: [88, 63, 9, 70], p2Claimed: [18, 80, 100, 2],   pads: { pad1: 2, pad2: 9 } },
+  2: { p1Claimed: [35, 44, 110, 132], p2Claimed: [49, 63, 12, 33], pads: { pad1: 7, pad2: 6 } },
+  3: { p1Claimed: [35, 20, 100],     p2Claimed: [42, 55, 144],     pads: { pad1: 5, pad2: 7 } }
+};
+function resetScenario(idx) {
+  const init = SCENARIO_INITIAL[idx];
+  const sc = SCENARIOS[idx];
+  sc.p1Claimed = [...init.p1Claimed];
+  sc.p2Claimed = [...init.p2Claimed];
+  sc.pads = { ...init.pads };
+  state.moves[idx] = null;
+  drawBoard(`board${idx}`, idx);
+  renderPads(`pads${idx}`, idx);
+  const cap = document.getElementById(`caption${idx}`);
+  if (cap) { cap.className = 'caption'; cap.innerHTML = ''; }
+  hideWinBanner(idx);
+}
+
 function restart() {
   state.screen = 1;
   state.problem = null;
   state.studentName = '';
   state.moves = { 1: null, 2: null, 3: null };
   // Reset scenario state
-  SCENARIOS[1].pads = { pad1: 2, pad2: 9 };
-  SCENARIOS[2].pads = { pad1: 7, pad2: 6 };
-  SCENARIOS[3].pads = { pad1: 5, pad2: 7 };
+  [1, 2, 3].forEach(i => {
+    const init = SCENARIO_INITIAL[i];
+    SCENARIOS[i].p1Claimed = [...init.p1Claimed];
+    SCENARIOS[i].p2Claimed = [...init.p2Claimed];
+    SCENARIOS[i].pads = { ...init.pads };
+  });
   [1,2,3].forEach(i => {
     const cap = document.getElementById('caption' + i);
     if (cap) { cap.className = 'caption'; cap.innerHTML = ''; }
+    hideWinBanner(i);
   });
   // Reset name input + chips
   const nameInput = document.getElementById('studentNameInput');
@@ -2063,8 +2275,8 @@ const PATHWAY_CONTENT = {
   apply: {
     3: {
       title: "Can they apply what they know?",
-      lead:  "There's a winning move on the board — two, actually. Help them find it.",
-      hint:  '<strong>{NAME} can change only one number pad.</strong> Which factor should they change? They need a product of <strong>2</strong> or <strong>27</strong>.'
+      lead:  "There's a winning move on the board. Help them find it.",
+      hint:  '<strong>{NAME} can change only one number pad.</strong> Which factor should they change? They need a product of <strong>27</strong>.'
     },
     4: {
       title: "Can they think defensively?",
@@ -2081,7 +2293,7 @@ const PATHWAY_CONTENT = {
     3: {
       title: "Can they reason multiplicatively?",
       lead:  "Counting strategies take too long. This needs a factor pair, not a count.",
-      hint:  'Look for a factor relationship — not a counting path. They need to reach <strong>2</strong> or <strong>27</strong>.'
+      hint:  'Look for a factor relationship — not a counting path. They need to reach <strong>27</strong>.'
     },
     4: {
       title: "Can they spot the factor fast?",
@@ -2096,9 +2308,9 @@ const PATHWAY_CONTENT = {
   },
   freeze: {
     3: {
-      title: "Can they find a different path?",
-      lead:  "Same game, two possible winning pairs. Can they stay flexible?",
-      hint:  'They need <strong>2</strong> or <strong>27</strong> — two different winning routes.'
+      title: "Can they find the path?",
+      lead:  "The board has shifted. Can {name} stay flexible enough to spot the win?",
+      hint:  'They need to reach <strong>27</strong>. Which pad change gets them there?'
     },
     4: {
       title: "Can they adjust to a new arrangement?",
@@ -2115,7 +2327,7 @@ const PATHWAY_CONTENT = {
     3: {
       title: "Can they slow down to think?",
       lead:  "Speed won't find this. Decision-making will.",
-      hint:  'They need to reach <strong>2</strong> or <strong>27</strong>. Which pad change actually gets them there?'
+      hint:  'They need to reach <strong>27</strong>. Which pad change actually gets them there?'
     },
     4: {
       title: "Can they spot the deliberate move?",

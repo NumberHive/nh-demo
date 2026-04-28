@@ -1364,50 +1364,50 @@ const SCENARIOS = {
 const MESSAGES = {
   1: {
     win: {
-      apply:    { h: "Well done. They applied what they know.", b: "Not just recall — a reason to use it." },
-      counting: { h: "That's multiplicative reasoning.", b: "No counting — they thought in factors." },
-      freeze:   { h: "Flexible thinking — there were two winning factor pairs.", b: "They adjusted when the first didn't fit." },
-      speed:    { h: "That's fluency with understanding.", b: "Not speed — decision making. They chose the move, not just rushed to it." }
+      apply:    { h: "✓ Exactly right.",      b: "{NAME} spotted that 1×2=2 (or 3×9=27) reached a winning cell. That's fact application — not just recall." },
+      counting: { h: "✓ Multiplicative thinking.", b: "{NAME} reached the winning cell with a single factor change. No counting — factors." },
+      freeze:   { h: "✓ Flexible.",            b: "Two winning paths sat on the board. {NAME} stayed open and found one. That's flexible fluency." },
+      speed:    { h: "✓ Chosen, not rushed.",  b: "{NAME} reasoned about which factor change actually wins — not the first thing that came to mind." }
     },
     winAlt: {
-      apply:    { h: "Same product, different factors.", b: "Another path to the same win. That's applied, flexible knowledge." },
-      counting: { h: "They're reasoning, not counting.", b: "Seeing more than one factor pair for the same product — that's multiplicative thinking." },
-      freeze:   { h: "Two winning pairs — they picked one.", b: "Flexible fluency means seeing more than one way through." },
-      speed:    { h: "Understanding, visible.", b: "They didn't jump — they reasoned. That's the difference between speed and fluency." }
+      apply:    { h: "✓ Same product, different factors.", b: "{NAME} found another path to the same win. They hold the relationships, not just the answers." },
+      counting: { h: "✓ Two ways to the same product.",    b: "{NAME} saw the second route. That's multiplicative thinking taking hold." },
+      freeze:   { h: "✓ Flexible fluency.",                 b: "Two winning pairs existed — {NAME} picked one and went. They didn't get stuck on the first idea." },
+      speed:    { h: "✓ Understanding made visible.",       b: "{NAME} didn't jump — they reasoned. That's the difference between speed and fluency." }
     },
     miss: {
-      apply:    { h: "A real move — but not the winning one.", b: "A stronger player spots which factors actually reach the winning cell." },
-      counting: { h: "Not a win — but a good prompt for discussion.", b: "What product does your student need? What factors make it?" },
-      freeze:   { h: "Close, but not there.", b: "Two winning cells were reachable. Can they find one?" },
-      speed:    { h: "Quick move — but not strategic.", b: "The best move here takes a beat of thought, not speed." }
+      apply:    { h: "Almost.",      b: "A real move, but not a winning one. The strongest players spot which factors actually reach the target cell." },
+      counting: { h: "Not a win — yet.", b: "Worth pausing here: what product does {name} need? Which factor change makes it?" },
+      freeze:   { h: "Close.",       b: "Two winning cells were reachable. {NAME} can find one with another look." },
+      speed:    { h: "Quick, not yet strategic.", b: "The best move here takes a beat of thought. Slow down — what wins?" }
     }
   },
   2: {
     block: {
-      apply:    { h: "They used a harder fact — strategically.", b: "They didn't just know it. They used it to defend." },
-      counting: { h: "That's strategic multiplication.", b: "They used 7 × 4 to stop the win." },
-      freeze:   { h: "Adaptive thinking.", b: "They adjusted and used a harder fact." },
-      speed:    { h: "Deliberate, strategic thinking.", b: "Not a reflex — anticipation. They made the right call under pressure." }
+      apply:    { h: "✓ Sharp defence.",     b: "{NAME} used 4×7=28 to stop the win. Knowing the fact and using it strategically — that's the difference." },
+      counting: { h: "✓ Fluency under pressure.", b: "{NAME} retrieved 4×7=28 in a real moment, not on a worksheet. That's fluency in context." },
+      freeze:   { h: "✓ Adapted to the board.",   b: "The arrangement shifted, {NAME} found a fact that fit, and the threat is gone." },
+      speed:    { h: "✓ Deliberate.",             b: "Not a reflex — anticipation. {NAME} spotted the threat and chose the right factor." }
     },
     "miss-block": {
-      apply:    { h: "A fact-correct move — but it didn't block.", b: "Which factors would land on the winning cell (28)? That's the question." },
-      counting: { h: "Not the block.", b: "The goal was to claim 28. What factors make 28?" },
-      freeze:   { h: "The opponent is still a move away from winning.", b: "Which factor change claims 28 and stops them?" },
-      speed:    { h: "Nope — that's not the block.", b: "Look at what Player 2 needs (28). Then find a factor pair that reaches it." }
+      apply:    { h: "Fact-correct, but not the block.", b: "Which factors actually reach 28? That's the question {NAME} needs to ask." },
+      counting: { h: "Not the block.",                   b: "Player 2 needs 28. What factor pair makes 28 from a single pad change?" },
+      freeze:   { h: "Threat still standing.",           b: "The opponent is one move from winning. Which factor change claims 28 and stops them?" },
+      speed:    { h: "Slow it down.",                    b: "What does Player 2 actually need? Find the factor pair that reaches it — then the block appears." }
     }
   },
   3: {
     safe: {
-      apply:    { h: "That's deep understanding, not just fact work.", b: "They're thinking about what to leave, not just what to use." },
-      counting: { h: "Reasoning about relationships, not numbers.", b: "That's how students move beyond counting." },
-      freeze:   { h: "Adaptive thinking.", b: "They're reading the board and the pads." },
-      speed:    { h: "Strong mathematical thinking.", b: "Understanding how factors connect — that can't be rushed." }
+      apply:    { h: "✓ That's the highest level.", b: "Thinking about what to leave, not just what to take. Deep, applied fluency from {NAME}." },
+      counting: { h: "✓ Reasoning about relationships.", b: "Not numbers in isolation — relationships between them. That's how students move beyond counting." },
+      freeze:   { h: "✓ Held two threats in mind.",      b: "{NAME} read the board and the pads — and chose the path that doesn't hand Player 2 a win." },
+      speed:    { h: "✓ Understanding wins this one.",   b: "Knowing how factors connect can't be rushed. {NAME} thought it through." }
     },
     leak: {
-      apply:    { h: "A fact-correct move — but it leaked a factor.", b: "Once that number's on the pad, the opponent can reach 18 in one change." },
-      counting: { h: "They used a fact — but didn't read the pad.", b: "2, 3, 6, 9 are factors of 18. Leaving any on the pads hands opponent the win." },
-      freeze:   { h: "The board looked safe — the pads didn't.", b: "When the numbers change, so do the threats. Did they spot it?" },
-      speed:    { h: "Quick move — strategic cost.", b: "This is where understanding beats speed. What factors make 18? Don't leave them." }
+      apply:    { h: "Fact-correct, factor leaked.", b: "Once that number's on a pad, Player 2 can reach 18 in one change. The defence was in what {NAME} left behind." },
+      counting: { h: "Used the fact, missed the pad.", b: "2, 3, 6, and 9 are all factors of 18. Leaving any on the pads hands the win away." },
+      freeze:   { h: "The board looked safe — the pads didn't.", b: "When the numbers change, the threats change too. The pads matter as much as the cells." },
+      speed:    { h: "Quick move, strategic cost.", b: "This is where understanding beats speed. What factors make 18? Don't leave them." }
     }
   }
 };
@@ -1683,8 +1683,8 @@ function showCaption(scenarioIdx, move) {
   capEl.className = `caption ${cls}`;
   capEl.innerHTML = `
     <div class="cap-card">
-      <div class="headline">${msg.h}</div>
-      <div class="cap-body">${msg.b}</div>
+      <div class="headline">${fillName(msg.h)}</div>
+      <div class="cap-body">${fillName(msg.b)}</div>
       <div class="cap-actions">
         <button class="btn primary btn-arrow" onclick="goto(${nextScreen})">Continue</button>
       </div>

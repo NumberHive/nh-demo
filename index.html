@@ -320,11 +320,6 @@
     user-select: none;
     font-size: 10px;
   }
-  .hex.current {
-    stroke: var(--honey-deep) !important;
-    stroke-width: 1.8px !important;
-    stroke-dasharray: 4 2;
-  }
   .hex.current-text { fill: var(--ink); font-weight: 800; }
   .hex.winline {
     animation: winPulse 1.2s ease-in-out infinite;
@@ -1059,16 +1054,16 @@
       <p class="lead" style="margin-top:8px; margin-bottom:20px;">Your answer shapes what you see next.</p>
       <div class="options" id="problemOptions">
         <button class="option" data-problem="apply">
-          <span class="num">01</span>They know their facts — but can't apply them flexibly
+          <span class="num">01</span>They know their facts — but <strong>can't apply</strong> them <strong>flexibly</strong>
         </button>
         <button class="option" data-problem="counting">
-          <span class="num">02</span>They struggle to recall basic facts quickly
+          <span class="num">02</span>They struggle to <strong>recall basic facts quickly</strong>
         </button>
         <button class="option" data-problem="freeze">
-          <span class="num">03</span>They freeze when numbers change or context shifts
+          <span class="num">03</span>They <strong>freeze</strong> when numbers <strong>change</strong> or <strong>context shifts</strong>
         </button>
         <button class="option" data-problem="speed">
-          <span class="num">04</span>They answer fast, but don't really understand why
+          <span class="num">04</span>They answer fast, but <strong>don't really understand</strong> why
         </button>
       </div>
     </section>
@@ -1082,7 +1077,7 @@
         <form class="name-form" onsubmit="event.preventDefault(); confirmName();">
           <input type="text" id="studentNameInput" placeholder="e.g. Jamie" maxlength="24" autocomplete="off">
           <button type="submit" class="btn primary btn-arrow">Continue →</button>
-          <button type="button" class="skip" onclick="skipName()">Skip — use a placeholder student</button>
+          <button type="button" class="skip" onclick="event.preventDefault(); event.stopPropagation(); skipName(); return false;">Skip — use a placeholder student</button>
         </form>
       </div>
     </section>
@@ -1618,7 +1613,7 @@ const SCENARIOS = {
 const MESSAGES = {
   1: {
     win: {
-      apply:    { h: "✓ Exactly right.",      b: "{NAME} spotted that 3×9=27 completed the line. That's fact application — not just recall." },
+      apply:    { h: "✓ Exactly right.",      b: "{NAME} spotted that 3×9=27 completed 4 in a row for the win. That's applying facts — not just recall." },
       counting: { h: "✓ Multiplicative thinking.", b: "{NAME} reached the winning cell with a single factor change. No counting — factors." },
       freeze:   { h: "✓ Flexible thinking.",  b: "{NAME} found the path on a board they hadn't seen before. That's flexible fluency at work." },
       speed:    { h: "✓ Chosen, not rushed.",  b: "{NAME} reasoned about which factor change actually wins — not the first thing that came to mind." }
@@ -1638,7 +1633,7 @@ const MESSAGES = {
   },
   2: {
     block: {
-      apply:    { h: "✓ Sharp defence.",     b: "{NAME} used 4×7=28 to stop the win. Knowing the fact and using it strategically — that's the difference." },
+      apply:    { h: "✓ Sharp defence.",     b: "{NAME} used 4×7=28 to block the win. Knowing the fact and applying it strategically — that's the difference." },
       counting: { h: "✓ Fluency under pressure.", b: "{NAME} retrieved 4×7=28 in a real moment, not on a worksheet. That's fluency in context." },
       freeze:   { h: "✓ Adapted to the board.",   b: "The arrangement shifted, {NAME} found a fact that fit, and the threat is gone." },
       speed:    { h: "✓ Deliberate.",             b: "Not a reflex — anticipation. {NAME} spotted the threat and chose the right factor." }
@@ -1652,7 +1647,7 @@ const MESSAGES = {
   },
   3: {
     safe: {
-      apply:    { h: "✓ That's the highest level.", b: "Thinking about what to leave, not just what to take. Deep, applied fluency from {NAME}." },
+      apply:    { h: "✓ That's the highest level.", b: "Thinking about what to leave, not just what to take. This is the application of flexible fluency from {NAME}." },
       counting: { h: "✓ Reasoning about relationships.", b: "Not numbers in isolation — relationships between them. That's how students move beyond counting." },
       freeze:   { h: "✓ Held two threats in mind.",      b: "{NAME} read the board and the pads — and chose the path that doesn't hand Player 2 a win." },
       speed:    { h: "✓ Understanding wins this one.",   b: "Knowing how factors connect can't be rushed. {NAME} thought it through." }
@@ -1720,12 +1715,8 @@ function drawBoard(svgId, scenarioIdx) {
         fill = 'var(--red)';
         textFill = '#FFFFFF';
       }
-
-      if (p === currentProduct) {
-        stroke = 'var(--ink)';
-        strokeW = 2.5;
-        cls += ' current';
-      }
+      // (Note: the "current product" cell used to have a dashed dark outline;
+      //  removed for cleaner look.)
 
       const poly = document.createElementNS(ns, 'polygon');
       poly.setAttribute('points', hexPoints(cx, cy, HEX_SIZE));
@@ -1776,17 +1767,7 @@ function highlightCell(svgId, product) {
 }
 
 function flashCurrent(svgId, oldProduct, newProduct) {
-  const svg = document.getElementById(svgId);
-  // Remove current from old
-  const oldPoly = svg.querySelector(`polygon[data-product="${oldProduct}"]`);
-  if (oldPoly) oldPoly.classList.remove('current');
-  // Add current to new
-  const newPoly = svg.querySelector(`polygon[data-product="${newProduct}"]`);
-  if (newPoly) {
-    newPoly.setAttribute('stroke', 'var(--ink)');
-    newPoly.setAttribute('stroke-width', '2.5');
-    newPoly.classList.add('current');
-  }
+  // Current-cell marker removed for cleaner look — no-op kept for callers.
 }
 
 /* ===========================================================
@@ -1902,11 +1883,12 @@ function handleOpenPadClick(scenarioIdx, padKey, newVal) {
 
     if (outcome === 'win') {
       winLine.forEach(p => paintCell(`board${scenarioIdx}`, p, 'p1', true));
-      showWinBanner(scenarioIdx);
+      // Let the user see the winning line for a beat before the banner pops
+      setTimeout(() => showWinBanner(scenarioIdx), 1000);
       setTimeout(() => {
         hideWinBanner(scenarioIdx);
         showCaption(scenarioIdx, { outcome: 'win', winLine, claim: 'p1' });
-      }, 1800);
+      }, 2800);
     } else if (outcome === 'block') {
       winLine.forEach(p => highlightCell(`board${scenarioIdx}`, p));
       setTimeout(() => {
@@ -1957,7 +1939,7 @@ function handleS3BotResponse(scenarioIdx, sc, leakInfo) {
       retryable: true,
       customMessage: {
         h: "Player 2 won.",
-        b: `${nameOrThey()} left <strong>${leakInfo.studentLeftFactor}</strong> on a pad — Player 2 played ${leakInfo.studentLeftFactor} × ${leakInfo.botValue} = <strong>18</strong> and completed four in a row. Try again — keep <strong>2, 3, 6, and 9</strong> off the pads.`
+        b: `${nameOrThey()} left <strong>${leakInfo.studentLeftFactor}</strong> as a factor on the number pad — Player 2 played ${leakInfo.studentLeftFactor} × ${leakInfo.botValue} to take the <strong>18</strong> cell. Try again, ensuring the factors of 18 are not left for Player 2 to use.`
       }
     });
   }, 2100);
@@ -1998,7 +1980,7 @@ function handleS2BotResponse(scenarioIdx, sc, studentPad, studentVal, studentPro
         retryable: true,
         customMessage: {
           h: "Not the block.",
-          b: `${nameOrThey()} moved the 7 off the pads, so Player 2 can't reach 28 immediately — but the right move was to claim <strong>28</strong> directly. Try again.`
+          b: `${nameOrThey()} moved the 7 off the pads, so Player 2 can't reach 28 immediately — but the best move was to claim <strong>28</strong> directly. Try again.`
         }
       });
     }, 800);
@@ -2333,18 +2315,18 @@ const PATHWAY_CONTENT = {
   apply: {
     3: {
       title: "Can they apply what they know?",
-      lead:  "There's a winning move on the board. Help them find it.",
+      lead:  "4 in a row wins the game. There's a winning move on the board. Help them find it.",
       hint:  '<strong>{NAME} can change only one number pad.</strong> Which factor should they change? They need a product of <strong>27</strong>.'
     },
     4: {
       title: "Can they think defensively?",
-      lead:  "Player 2 is one move from winning. Facts alone won't save them — they need strategy.",
-      hint:  'What are the factors of <strong>28</strong>? Is one already on a pad?'
+      lead:  "Player 2 can win by taking the 28 cell. Facts alone won't save {name} — they need strategy.",
+      hint:  'What are the factors of <strong>28</strong>? Is one already on a number pad?'
     },
     5: {
-      title: "Can they plan two moves ahead?",
-      lead:  "Player 2 only needs the right factor pad to appear. Which cells are safe to leave?",
-      hint:  'Player 2 needs <strong>18</strong>. What can {name} leave safely? (18 = 2×9 = 3×6)'
+      title: "Can they apply factors and multiples knowledge when it counts?",
+      lead:  "Player 2 can win with 18. {NAME} can't block this time, so how can they prevent Player 2 from getting 4 in a row?",
+      hint:  '{NAME} can\'t block this time because they don\'t have any of the factors of 18 available. They need to make sure they don\'t leave any of those factors for Player 2 to use.'
     }
   },
   counting: {
@@ -2405,9 +2387,9 @@ const PATHWAY_CONTENT = {
    {name} for lowercase ("your student" fallback). */
 const CONTEXT_CARDS = {
   apply: {
-    3: "You said students know facts but can't apply them flexibly. Watch what happens when <strong>{NAME}</strong> has to use that knowledge in a real game decision — the hive forces application, not just recall.",
-    4: "This is where it gets interesting. <strong>{NAME}</strong> can't just remember 4×7=28 — they need to decide whether claiming that cell is the right move <em>right now</em>.",
-    5: "The highest level of flexible fluency: holding multiple factor pairs in mind while reasoning about what's safe to leave. This is where <strong>{NAME}</strong> goes beyond fact knowledge."
+    3: "You said students <strong>know facts but can't apply them flexibly</strong>. Watch what happens when {NAME} has to use that knowledge in a real game decision — the hive forces application, not just recall.",
+    4: "This is where it gets really interesting. {NAME} knows they need the 28 cell to block Player 2, but how can they make that product using one of the factors on the number pads?",
+    5: "This is a high level of flexible fluency: thinking through factor pairs while reasoning what numbers are safe to leave."
   },
   counting: {
     3: "You said students struggle with quick recall. The game creates gentle pressure to retrieve facts, but in a low-stakes, engaging context. <strong>{NAME}</strong> doesn't feel tested.",
@@ -2450,7 +2432,7 @@ function customizeScenarioPrompts() {
     }
     if (ctxEl) {
       if (ctx[n]) {
-        ctxEl.innerHTML = `<span class="you-said">You said…</span>${fillName(ctx[n])}`;
+        ctxEl.innerHTML = fillName(ctx[n]);
         ctxEl.style.display = 'block';
       } else {
         ctxEl.style.display = 'none';

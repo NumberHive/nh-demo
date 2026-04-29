@@ -505,6 +505,16 @@
     color: var(--ink);
   }
 
+  /* Dim the coaching tip + pads while a popup or win banner is showing */
+  .game-frame:has(.caption.show) .scenario-prompt,
+  .game-frame:has(.win-banner.show) .scenario-prompt,
+  .game-frame:has(.caption.show) .numpads,
+  .game-frame:has(.win-banner.show) .numpads {
+    opacity: 0.35;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+
   /* Win celebration banner — overlays the game frame on student win */
   .win-banner {
     position: absolute;
@@ -958,6 +968,16 @@
   .thanks .bee { font-size: 56px; display: block; margin-bottom: 20px; }
 
   /* Signup form */
+  .signup-card.leader-signup {
+    background: linear-gradient(180deg, #fff 0%, var(--cream-warm) 100%);
+    border: 1.5px solid #C7BFA8;
+  }
+  .signup-card.leader-signup label {
+    color: var(--ink);
+  }
+  .signup-card.leader-signup input[type="email"] {
+    border-color: #C7BFA8;
+  }
   .signup-card {
     background: linear-gradient(180deg, #fff 0%, var(--honey-soft) 100%);
     border: 1.5px solid var(--border);
@@ -1074,8 +1094,6 @@
       <p id="s3prompt" class="meta" style="margin-top:6px;">They know their facts. Can they apply them? There's a winning move on the board — two, actually.</p>
 
       <div class="context-card" id="contextS3" style="display:none;"></div>
-
-      <div class="intro-line">Students change one number pad to make products in the hive and connect four in a row.</div>
 
       <div class="game-frame">
         <div class="player-bar">
@@ -1432,11 +1450,11 @@
           </div>
           <div class="leader-stat-item">
             <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect x="4" y="18" width="5" height="6" rx="1" fill="#3B82F6"/>
-              <rect x="11.5" y="13" width="5" height="11" rx="1" fill="#3B82F6"/>
-              <rect x="19" y="8" width="5" height="16" rx="1" fill="#3B82F6"/>
-              <polyline points="4,12 14,7 24,4" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <polygon points="20,3 25,3 25,8" fill="#3B82F6"/>
+              <rect x="4" y="18" width="5" height="6" rx="1" fill="#C78508"/>
+              <rect x="11.5" y="13" width="5" height="11" rx="1" fill="#C78508"/>
+              <rect x="19" y="8" width="5" height="16" rx="1" fill="#C78508"/>
+              <polyline points="4,12 14,7 24,4" fill="none" stroke="#C78508" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polygon points="20,3 25,3 25,8" fill="#C78508"/>
             </svg>
             <span>Evidence of thinking<br>as it happens</span>
           </div>
@@ -1455,7 +1473,7 @@
         <button class="btn ghost" onclick="goto(9)">← Back</button>
       </div>
 
-      <form class="signup-card" id="leaderForm" style="display:none; margin:24px auto 0;" onsubmit="event.preventDefault(); submitLeaderForm();">
+      <form class="signup-card leader-signup" id="leaderForm" style="display:none; margin:24px auto 0;" onsubmit="event.preventDefault(); submitLeaderForm();">
         <label for="leaderEmail">Send the overview to</label>
         <input type="email" id="leaderEmail" placeholder="leader@school.edu" required>
         <label class="check-row" for="leaderUpdates">
@@ -1577,29 +1595,17 @@ const SCENARIOS = {
     winLine: [28, 49, 63, 12]
   },
   3: {
-    // Anticipation. Player 2 threatens with row 5: 42, 55, 144.
-    // They need 18 to complete 4-in-a-row (18-42-55-144).
-    // Current pads: 5 × 7 = 35 (student's last move).
-    // Neither pad is a factor of 18. Student must not leave {2, 3, 6, 9} on pads.
-    p1Claimed: [35, 20, 100],
-    p2Claimed: [42, 55, 144],
+    // Anticipation. P2 threatens with row 5: 42, 55, 144 — they win at 18.
+    // 81 (P1) blocks the alternate completion 42-55-144-81, so the only
+    // remaining route for P2 is via 18 (= 2×9 or 3×6).
+    // Student must keep factors of 18 (2, 3, 6, 9) off the pads.
+    p1Claimed: [35, 20, 100, 81],
+    p2Claimed: [42, 55, 144, 11],
     pads: { pad1: 5, pad2: 7 },
-    padMoves: {
-      "pad1:9": { // 9 × 7 = 63, BUT leaves 9 on pad — P2 plays 9→2 and claims 18
-        result: 63, outcome: "leak",
-        leakFactor: 9, leakResult: 18, leakPad: 'pad2', leakTo: 2,
-        claim: 'p1'
-      },
-      "pad2:8": { // 5 × 8 = 40, safe — neither 5 nor 8 is factor of 18
-        result: 40, outcome: "safe",
-        claim: 'p1'
-      },
-      "pad2:6": { // 5 × 6 = 30, but leaves 6 — P2 plays 5→3 and claims 18
-        result: 30, outcome: "leak",
-        leakFactor: 6, leakResult: 18, leakPad: 'pad1', leakTo: 3,
-        claim: 'p1'
-      }
-    }
+    openPads: true,
+    leakFactors: [2, 3, 6, 9],
+    leakTarget: 18,
+    leakLine: [18, 42, 55, 144]
   }
 };
 
@@ -1860,13 +1866,33 @@ function handleOpenPadClick(scenarioIdx, padKey, newVal) {
   flashCurrent(`board${scenarioIdx}`, oldProduct, newProduct);
 
   // Determine outcome
-  let outcome, winLine = null;
+  let outcome, winLine = null, leakInfo = null;
   if (scenarioIdx === 1) {
     if (newProduct === sc.winTarget) { outcome = 'win'; winLine = sc.winLine; }
     else outcome = 'miss';
   } else if (scenarioIdx === 2) {
     if (newProduct === sc.blockTarget) { outcome = 'block'; winLine = sc.winLine; }
     else outcome = 'wrong-block';
+  } else if (scenarioIdx === 3) {
+    // Leak detected if either pad now holds a factor of 18.
+    const leakFactors = sc.leakFactors;
+    if (leakFactors.includes(sc.pads.pad1)) {
+      outcome = 'leak';
+      leakInfo = {
+        botPad: 'pad2',
+        botValue: sc.leakTarget / sc.pads.pad1,
+        studentLeftFactor: sc.pads.pad1
+      };
+    } else if (leakFactors.includes(sc.pads.pad2)) {
+      outcome = 'leak';
+      leakInfo = {
+        botPad: 'pad1',
+        botValue: sc.leakTarget / sc.pads.pad2,
+        studentLeftFactor: sc.pads.pad2
+      };
+    } else {
+      outcome = 'safe';
+    }
   }
 
   // Claim student's cell after the flash
@@ -1901,8 +1927,40 @@ function handleOpenPadClick(scenarioIdx, padKey, newVal) {
     } else if (outcome === 'wrong-block') {
       // Scenario 2 wrong move — bot may now win
       handleS2BotResponse(scenarioIdx, sc, padKey, newVal, newProduct);
+    } else if (outcome === 'safe') {
+      // Scenario 3 — student kept factors of 18 off the pads
+      setTimeout(() => {
+        showCaption(scenarioIdx, { outcome: 'safe', claim: 'p1' });
+      }, 700);
+    } else if (outcome === 'leak') {
+      // Scenario 3 — student left a factor of 18; bot completes 18
+      handleS3BotResponse(scenarioIdx, sc, leakInfo);
     }
   }, 350);
+}
+
+function handleS3BotResponse(scenarioIdx, sc, leakInfo) {
+  setTimeout(() => animateBotPad(scenarioIdx, leakInfo.botPad, leakInfo.botValue), 600);
+  setTimeout(() => {
+    const oldP = sc.pads.pad1 * sc.pads.pad2;
+    sc.pads[leakInfo.botPad] = leakInfo.botValue;
+    const newP = sc.pads.pad1 * sc.pads.pad2; // 18
+    flashCurrent(`board${scenarioIdx}`, oldP, newP);
+  }, 1100);
+  setTimeout(() => {
+    sc.p2Claimed.push(sc.leakTarget);
+    sc.leakLine.forEach(p => paintCell(`board${scenarioIdx}`, p, 'p2', true));
+  }, 1450);
+  setTimeout(() => {
+    showCaption(scenarioIdx, {
+      outcome: 'leak',
+      retryable: true,
+      customMessage: {
+        h: "Player 2 won.",
+        b: `${nameOrThey()} left <strong>${leakInfo.studentLeftFactor}</strong> on a pad — Player 2 played ${leakInfo.studentLeftFactor} × ${leakInfo.botValue} = <strong>18</strong> and completed four in a row. Try again — keep <strong>2, 3, 6, and 9</strong> off the pads.`
+      }
+    });
+  }, 2100);
 }
 
 function handleS2BotResponse(scenarioIdx, sc, studentPad, studentVal, studentProduct) {
@@ -2157,7 +2215,7 @@ function goto(n) {
 const SCENARIO_INITIAL = {
   1: { p1Claimed: [88, 63, 9, 70], p2Claimed: [18, 80, 100, 2],   pads: { pad1: 2, pad2: 9 } },
   2: { p1Claimed: [35, 44, 110, 132], p2Claimed: [49, 63, 12, 33], pads: { pad1: 7, pad2: 6 } },
-  3: { p1Claimed: [35, 20, 100],     p2Claimed: [42, 55, 144],     pads: { pad1: 5, pad2: 7 } }
+  3: { p1Claimed: [35, 20, 100, 81], p2Claimed: [42, 55, 144, 11], pads: { pad1: 5, pad2: 7 } }
 };
 function resetScenario(idx) {
   const init = SCENARIO_INITIAL[idx];
@@ -2391,7 +2449,7 @@ function customizeScenarioPrompts() {
       hintEl.innerHTML = `<div class="icon">?</div><div>${fillName(content[n].hint)}</div>`;
     }
     if (ctxEl) {
-      if (ctx[n] && state.studentName) {
+      if (ctx[n]) {
         ctxEl.innerHTML = `<span class="you-said">You said…</span>${fillName(ctx[n])}`;
         ctxEl.style.display = 'block';
       } else {
@@ -2493,7 +2551,7 @@ function renderMgrid() {
 const MINDSET_ROWS = [
   { dim: "Confidence",            s1: 3.1, s2: 4.2 },
   { dim: "Self-efficacy",         s1: 2.9, s2: 4.0 },
-  { dim: "Attitude toward maths", s1: 3.4, s2: 4.4 },
+  { dim: "Attitude toward maths", s1: 3.4, s2: 3.6 },
   { dim: "Growth mindset",        s1: 3.2, s2: 4.3 },
   { dim: "Mathematical reasoning",s1: 2.8, s2: 3.9 }
 ];
